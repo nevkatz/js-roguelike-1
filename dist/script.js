@@ -1,9 +1,17 @@
+
+/**
+ *  Button creation mmethod.
+ *  
+ */ 
 var Button = React.createClass({ displayName: "Button",
   action: function () {
     toggleShadow();
   },
   render: function () {
-    return /*#__PURE__*/React.createElement("button", { className: this.props.class, onClick: this.action }, this.props.text);
+    return /*#__PURE__*/React.createElement("button", 
+      { className: this.props.class, 
+        onClick: this.action 
+      }, this.props.text);
   } });
 
 
@@ -211,6 +219,12 @@ function generateWeapon(amount) {
   }
 }
 
+/**
+ * 
+ * @TODO: Update so it's pure javaScript
+ * use an array for the first three
+ * use standalone functions for the others
+ */ 
 function updateLegend() {
   $("#xp").text(player.xp);
   $("#level").text(player.level);
@@ -220,6 +234,14 @@ function updateLegend() {
   $("#enemies").text(TOTAL_ENEMIES - defeatedEnemies);
 }
 
+
+/**
+ *
+ * @TODO: Make all maps an array; lose the switch case
+ * OR make an associative array that maps cololors to RGB's 
+ * BUT FOR NOW, use comments
+ * 
+ */ 
 function drawMap(startX, startY, endX, endY) {
   var color;
   for (var row = startY; row < endY; row++) {
@@ -288,7 +310,9 @@ function generateValidCoords() {
     y: y };
 
 }
-
+/**
+ * @TODO: Write helper function for enemy
+ */ 
 function generateEnemies(amount) {
   for (var i = 0; i < amount; i++) {
     var coords = generateValidCoords();
@@ -319,6 +343,11 @@ function drawObject(x, y, color) {
 }
 
 // key down events
+/**
+ * 
+ * @TODO: Lose the javaScript
+ * https://stackoverflow.com/questions/26131686/trigger-keyboard-event-in-vanilla-javascript
+ */ 
 $(document).keydown(function (e) {
   var x = player.coords.x;
   var y = player.coords.y;
@@ -420,6 +449,10 @@ function updatePlayerPosition(oldX, oldY, newX, newY) {
   map[newY][newX] = 2;
   player.coords = { x: newX, y: newY };
 
+
+  /**
+   * @TODO: Make sense of this an explain it.
+   */ 
   var startX = oldX - VISIBILITY < 0 ? 0 : oldX - VISIBILITY;
   var startY = oldY - VISIBILITY < 0 ? 0 : oldY - VISIBILITY;
   var endX = newX + VISIBILITY >= COLS ? COLS - 1 : newX + VISIBILITY;
