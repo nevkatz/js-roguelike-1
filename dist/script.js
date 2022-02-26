@@ -108,8 +108,6 @@ var Map = React.createClass({ displayName: "Map",
       React.createElement("canvas", { id: "grid", width: "801px", height: "601px" }));
 
   } });
-
-
 var Legend = React.createClass({ displayName: "Legend",
   render: function () {
     return (
@@ -166,7 +164,11 @@ const MAX_ERRORS_COUNT = 1000;
 const MINIMUM_TILES_AMOUNT = 1000;
 
 
-
+/**
+ * Next steps
+ * Adjust the constants
+ * 
+ */ 
 
 /**
  * Start Game
@@ -189,6 +191,8 @@ function startGame() {
 
 /**
  * The generate map function
+ * 
+ * This algorithmm starts in the center and works its way outward.
  */ 
 function generateMap() {
   for (var row = 0; row < ROWS; row++) {
@@ -208,6 +212,7 @@ function generateMap() {
       x = COLS / 2;
       y = ROWS / 2;
   }
+  returnToCenter();
 
   const limit = 30000;
 
@@ -229,7 +234,8 @@ function generateMap() {
 
       // while on far left or far right
       while (x <= 3 || x >= COLS - 4) {
-        x += directions[Math.floor(Math.random() * directions.length)];
+        let x_idx = Math.floor(Math.random() * directions.length);
+        x += directions[x_idx];
         errors++;
         if (errors > MAX_ERRORS_COUNT) {
           if (tiles < MINIMUM_TILES_AMOUNT) {
@@ -250,7 +256,8 @@ function generateMap() {
       // so every time we add a floor here, we
       // while near the top or the bottom
       while (y <= 3 || y >= ROWS - 4) {
-        y += directions[Math.floor(Math.random() * directions.length)];
+        let y_idx = Math.floor(Math.random() * directions.length);
+        y += directions[y_idx];
         errors++;
         if (errors > MAX_ERRORS_COUNT) {
           // if we still have tiles
@@ -272,7 +279,6 @@ function generateMap() {
     }
     errors = 0;
   } // end the large loop
-
 };
 
 
