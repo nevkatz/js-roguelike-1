@@ -538,6 +538,7 @@ function enemyDefeated(enemy) {
   }
   // remove enemy from map.
   removeObjFromMap(enemy.coords.x, enemy.coords.y);
+  
   drawMap(enemy.coords.x - 1, enemy.coords.y - 1, enemy.coords.x + 1, enemy.coords.y + 1);
   
   // remove enemy from enemies array
@@ -547,7 +548,10 @@ function enemyDefeated(enemy) {
   game.enemies.slice(e_idx, 1);
 
   player.xp += 50;
+
+  // level up if needed.
   if (player.xp - 100 * (player.level - 1) >= 100) {
+
     player.level++;
   }
   updateLegend();
