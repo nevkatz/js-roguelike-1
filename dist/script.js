@@ -288,33 +288,39 @@ function updateLegend() {
  */ 
 function drawMap(startX, startY, endX, endY) {
   var color;
+  let colors = [
+               // wall
+               'grey',
+                // floor
+                'white',
+                // player
+                'blue',
+                // enemy
+                'red',
+                // health drop
+                'green',
+                // weapon
+                'orange'
+                ];
+
+  // loop through all cells of the map
   for (var row = startY; row < endY; row++) {
     for (var col = startX; col < endX; col++) {
-      if (isShadowToggled && shadow[row][col] == 0) {
-        drawObject(col, row, "black");
-      } else {
-        switch (map[row][col]) {
-          case 1:
-            color = "white";
-            break;
-          case 2:
-            color = "blue";
-            break;
-          case 3:
-            color = "red";
-            break;
-          case 4:
-            color = "green";
-            break;
-          case 5:
-            color = "orange";
-            break;
-          default:
-            color = "grey";}
 
-        drawObject(col, row, color);
+      // if shadow is on and the shadow is down....
+      if (isShadowToggled && shadow[row][col] == 0) {
+        // simply draw black.
+        color = 'black';
+      } 
+      else 
+      {
+        let c_idx = map[row][col];
+
+        color = colors[c_idx];
       }
-    }
+       drawObject(col, row, color);
+
+    } // end loop
   }
 }
 
