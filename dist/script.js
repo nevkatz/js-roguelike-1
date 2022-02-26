@@ -8,7 +8,7 @@ var Button = React.createClass({ displayName: "Button",
     toggleShadow();
   },
   render: function () {
-    return /*#__PURE__*/React.createElement("button", 
+    return React.createElement("button", 
       { className: this.props.class, 
         onClick: this.action 
       }, this.props.text);
@@ -17,7 +17,7 @@ var Button = React.createClass({ displayName: "Button",
 
 var Map = React.createClass({ displayName: "Map",
   render: function () {
-    return /*#__PURE__*/(
+    return (
       React.createElement("canvas", { id: "grid", width: "801px", height: "601px" }));
 
   } });
@@ -25,32 +25,33 @@ var Map = React.createClass({ displayName: "Map",
 
 var Legend = React.createClass({ displayName: "Legend",
   render: function () {
-    return /*#__PURE__*/(
-      React.createElement("div", null, /*#__PURE__*/
-      React.createElement("div", null, /*#__PURE__*/React.createElement("h2", null, /*#__PURE__*/
-      React.createElement("b", null, "XP"), ": ", /*#__PURE__*/React.createElement("span", { id: "xp" }, "0"), "- ", /*#__PURE__*/
-      React.createElement("b", null, "Level"), ": ", /*#__PURE__*/React.createElement("span", { id: "level" }, "0"), "- ", /*#__PURE__*/
-      React.createElement("b", null, "Health"), ": ", /*#__PURE__*/React.createElement("span", { id: "health" }, "0"), "- ", /*#__PURE__*/
-      React.createElement("b", null, "Weapon"), ": ", /*#__PURE__*/React.createElement("span", { id: "weapon" }, "0"), "- ", /*#__PURE__*/
-      React.createElement("b", null, "Damage"), ": ", /*#__PURE__*/React.createElement("span", { id: "damage" }, "0"))), /*#__PURE__*/
-      React.createElement("h3", null, "Enemies left: ", /*#__PURE__*/React.createElement("span", { id: "enemies" }, "0"))));
+    return (
+      React.createElement("div", null, 
+      React.createElement("div", null, React.createElement("h2", null, 
+
+      React.createElement("b", null, "XP"), ": ", React.createElement("span", { id: "xp" }, "0"), "- ", 
+      React.createElement("b", null, "Level"), ": ", React.createElement("span", { id: "level" }, "0"), "- ", 
+      React.createElement("b", null, "Health"), ": ", React.createElement("span", { id: "health" }, "0"), "- ", 
+      React.createElement("b", null, "Weapon"), ": ", React.createElement("span", { id: "weapon" }, "0"), "- ", 
+      React.createElement("b", null, "Damage"), ": ", React.createElement("span", { id: "damage" }, "0"))), 
+      React.createElement("h3", null, "Enemies left: ", React.createElement("span", { id: "enemies" }, "0"))));
 
   } });
 
 
 var View = React.createClass({ displayName: "View",
   render: function () {
-    return /*#__PURE__*/(
-      React.createElement("div", null, /*#__PURE__*/
-      React.createElement(Legend, null), /*#__PURE__*/
-      React.createElement(Map, null), /*#__PURE__*/
+    return (
+      React.createElement("div", null, 
+      React.createElement(Legend, null), 
+      React.createElement(Map, null), 
       React.createElement(Button, { class: "btn btn-success", text: "Toggle Shadow" })));
 
 
   } });
 
 
-React.render( /*#__PURE__*/React.createElement(View, null),
+React.render( React.createElement(View, null),
 document.getElementById('container'));
 
 
@@ -58,45 +59,81 @@ document.getElementById('container'));
 // create board
 var map = [];
 var rooms = 0;
+
+/**
+ * 
+ * Constants
+ */ 
 const WEAPONS = [{
-  name: "Knife",
+  name: "Dagger",
   damage: 15 },
 {
-  name: "Gun",
+  name: "Sword",
   damage: 30 },
 {
-  name: "Bazooka",
+  name: "Hammer",
   damage: 60 },
 {
-  name: "Atomic Bomb",
+  name: "Axe",
   damage: 100 }];
+
+
 
 const POTIONS = [10, 20, 30, 40, 50];
 const ENEMIES_HEALTH = [30, 30, 30, 30, 40, 40, 60, 80];
 const ENEMIES_DAMAGE = [30, 30, 30, 30, 40, 40, 60, 80];
-var shadow = []; //show only a part of map
+
+// the visible area
 const VISIBILITY = 3;
+
+// level algorithm
 const MAX_ROOM_SIZE = 15;
 const MIN_ROOM_SIZE = 4;
 const MAX_ROOM_DISTANCE = 4;
 const MIN_ROOM_DISTANCE = 2;
+
+// dimensions
 const COLS = 80;
 const ROWS = 60;
+
+// total enemies
 const TOTAL_ENEMIES = 10;
+
+// starting enemies amount
 const STARTING_ENEMIES_AMOUNT = 4;
 const STARTING_POTIONS_AMOUNT = 4;
 const STARTING_WEAPONS_AMOUNT = 3;
+
+var shadow = []; //show only a part of map
 var defeatedEnemies = 0;
 var enemies = [];
+
+/**
+ *  HTML5 Canvas
+ */ 
 var canvas = document.getElementById("grid");
 var context = canvas.getContext("2d");
+
+// grid status
 var busyCoordinates = [];
+
+// player and weapon
 var player;
 var weapon;
+
+// global shadow status
 var isShadowToggled = true;
+
+
 var directions = [-1, 0, 1];
+
 const MAX_ERRORS_COUNT = 1000;
 const MINIMUM_TILES_AMOUNT = 1000;
+
+/**
+ * Classes 
+ * 
+ */ 
 class Player {
   constructor(level, health, weapon, coords, xp) {
     this.level = level;
@@ -115,6 +152,9 @@ class Enemy {
   }}
 
 
+/**
+ * Start Game
+ */ 
 startGame();
 
 function startGame() {
@@ -131,6 +171,9 @@ function startGame() {
   }
 }
 
+/**
+ * The generate map function
+ */ 
 function generateMap() {
   for (var row = 0; row < ROWS; row++) {
     map.push([]);
@@ -187,6 +230,7 @@ function generateShadow() {
   var startY = player.coords.y - VISIBILITY < 0 ? 0 : player.coords.y - VISIBILITY;
   var endX = player.coords.x + VISIBILITY >= COLS ? COLS - 1 : player.coords.x + VISIBILITY;
   var endY = player.coords.y + VISIBILITY >= ROWS ? ROWS - 1 : player.coords.y + VISIBILITY;
+
   for (var row = 0; row < ROWS; row++) {
     shadow.push([]);
     for (var col = 0; col < COLS; col++) {
@@ -311,12 +355,24 @@ function generateValidCoords() {
 
 }
 /**
- * @TODO: Write helper function for enemy
+ * @param {Number} amount
+ * 
  */ 
 function generateEnemies(amount) {
   for (var i = 0; i < amount; i++) {
-    var coords = generateValidCoords();
-    enemies.push(new Enemy(ENEMIES_HEALTH[Math.floor(Math.random() * ENEMIES_HEALTH.length)], coords, ENEMIES_DAMAGE[Math.floor(Math.random() * ENEMIES_DAMAGE.length)]));
+    // generate valid coordinates.
+    let coords = generateValidCoords();
+
+    let h_idx = Math.floor(Math.random() * ENEMIES_HEALTH.length);
+
+    let d_idx = Math.floor(Math.random() * ENEMIES_DAMAGE.length);
+
+    let health = ENEMIES_HEALTH[h_idx];
+
+    let damage = ENEMIES_DAMAGE[d_idx];
+
+    enemies.push(new Enemy(health, coords, damage));
+
     addObjToMap(coords, 3);
   }
 }
@@ -345,14 +401,15 @@ function drawObject(x, y, color) {
 // key down events
 /**
  * 
- * @TODO: Lose the javaScript
+ * @TODO: Lose the jQuery
  * https://stackoverflow.com/questions/26131686/trigger-keyboard-event-in-vanilla-javascript
  */ 
-$(document).keydown(function (e) {
+document.addEventListener('keydown', function (e) {
   var x = player.coords.x;
   var y = player.coords.y;
   var oldX = player.coords.x;
   var oldY = player.coords.y;
+
   switch (e.which) {
     case 37: // left
       x--;
