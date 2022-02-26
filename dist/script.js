@@ -20,6 +20,21 @@ class Enemy {
   }
 }
 
+class Game {
+  constructor() {
+    this.map = [];
+    this.shadow = [];
+
+    this.isShadowToggled = false,
+    this.defeatedEnemies = 0;
+    this.enemies = [];
+    this.canvas = null;
+    this.context = null;
+    this.busyCoordinates = [];
+  }
+}
+
+
 /**
  * 
  * Constants
@@ -40,6 +55,8 @@ const WEAPONS = [{
 ];
 
 
+
+const WALL_IDX = 0;
 const FLOOR_IDX = 1;
 const PLAYER_IDX = 2;
 const ENEMY_IDX = 3;
@@ -77,16 +94,7 @@ const STARTING_WEAPONS_AMOUNT = 3;
 
 // game object
 
-var game = {
-  map:[],
-  shadow:[],
-  isShadowToggled:false,
-  defeatedEnemies:0,
-  enemies:[],
-  canvas:null,
-  context:null,
-  busyCoordinates:[]
-}
+
 
 /**
  *  DOM Population
@@ -123,7 +131,9 @@ var Legend = React.createClass({ displayName: "Legend",
 
   } });
 
-
+/**
+ * Create the whole game layout
+ */ 
 var View = React.createClass({ displayName: "View",
   render: function () {
     return (
@@ -148,6 +158,7 @@ document.getElementById('container'));
 /**
  *  HTML5 Canvas
  */ 
+var game = new Game();
 game.canvas = document.getElementById("grid");
 game.context = game.canvas.getContext("2d");
 
@@ -160,8 +171,7 @@ var player;
 
 
 
-const MAX_ERRORS_COUNT = 1000;
-const MINIMUM_TILES_AMOUNT = 1000;
+
 
 
 /**
@@ -195,18 +205,28 @@ function startGame() {
  * This algorithmm starts in the center and works its way outward.
  */ 
 function generateMap() {
+
+  // generate a solid wall.
+  
   for (var row = 0; row < ROWS; row++) {
+    // create row
     game.map.push([]);
+
     for (var col = 0; col < COLS; col++) {
-      game.map[row].push(0);
+      // create wall
+      game.map[row].push(WALL_IDX);
     }
   }
+
   var tiles = 0;
   var errors = 0;
 
   // start in the center
 
   var x = 0, y = 0;
+
+  const MAX_ERRORS_COUNT = 1000;
+  const MINIMUM_TILES_AMOUNT = 1000;
 
   const returnToCenter = () => {
       x = COLS / 2;
