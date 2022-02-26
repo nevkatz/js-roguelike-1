@@ -85,7 +85,7 @@ const COLS = 80;
 const ROWS = 60;
 
 // total enemies
-const TOTAL_ENEMIES = 10;
+const TOTAL_ENEMIES = 1;
 
 // starting enemies amount
 const STARTING_ENEMIES_AMOUNT = 4;
@@ -122,10 +122,10 @@ var Legend = React.createClass({ displayName: "Legend",
       React.createElement("div", null, 
       React.createElement("div", null, React.createElement("h2", null, 
 
-      React.createElement("b", null, "XP"), ": ", React.createElement("span", { id: "xp" }, "0"), "- ", 
-      React.createElement("b", null, "Level"), ": ", React.createElement("span", { id: "level" }, "0"), "- ", 
-      React.createElement("b", null, "Health"), ": ", React.createElement("span", { id: "health" }, "0"), "- ", 
-      React.createElement("b", null, "Weapon"), ": ", React.createElement("span", { id: "weapon" }, "0"), "- ", 
+      React.createElement("b", null, "XP"), ": ", React.createElement("span", { id: "xp" }, "0"), " - ", 
+      React.createElement("b", null, "Level"), ": ", React.createElement("span", { id: "level" }, "0"), " - ", 
+      React.createElement("b", null, "Health"), ": ", React.createElement("span", { id: "health" }, "0"), " - ", 
+      React.createElement("b", null, "Weapon"), ": ", React.createElement("span", { id: "weapon" }, "0"), " - ", 
       React.createElement("b", null, "Damage"), ": ", React.createElement("span", { id: "damage" }, "0"))), 
       React.createElement("h3", null, "Enemies left: ", React.createElement("span", { id: "enemies" }, "0"))));
 
@@ -186,8 +186,13 @@ var player;
 startGame();
 
 function startGame() {
+
+  console.log('len before: ' + game.map.length);
   generateMap();
+  console.log('len after: ' + game.map.length);
+
   setTimeout(gameSetUp(), 1000);
+
   function gameSetUp() {
     generatePlayer();
     generateWeapon(STARTING_WEAPONS_AMOUNT);
@@ -206,8 +211,10 @@ function startGame() {
  */ 
 function generateMap() {
 
+  console.log('generateMap');
+
   // generate a solid wall.
-  
+
   for (var row = 0; row < ROWS; row++) {
     // create row
     game.map.push([]);
@@ -218,12 +225,14 @@ function generateMap() {
     }
   }
 
-  var tiles = 0;
-  var errors = 0;
+  var tiles = 0, errors = 0;
+
 
   // start in the center
 
   var x = 0, y = 0;
+
+  console.log('rows: ' + ROWS + ' cols: ' + COLS);
 
   const MAX_ERRORS_COUNT = 1000;
   const MINIMUM_TILES_AMOUNT = 1000;
@@ -298,8 +307,10 @@ function generateMap() {
       tiles++;
     }
     errors = 0;
+    console.log('end of loop....');
   } // end the large loop
-};
+
+}
 
 
 
@@ -371,6 +382,7 @@ function updateLegend() {
  * 
  */ 
 function drawMap(startX, startY, endX, endY) {
+  console.log('drawMap');
 
   let colors = [
                // wall
@@ -463,6 +475,8 @@ function generateEnemies(amount) {
     let health = ENEMIES_HEALTH[h_idx];
 
     let damage = ENEMIES_DAMAGE[d_idx];
+
+    console.log('adding enemy ' + i);
 
     game.enemies.push(new Enemy(health, coords, damage));
 
@@ -558,7 +572,7 @@ function fightEnemy(enemy) {
 function enemyDefeated(enemy) {
   game.defeatedEnemies++;
   // check to see if player won
-  if (game.defeatedEnemies == 10) {
+  if (game.defeatedEnemies == TOTAL_ENEMIES) {
     userWins();
     return;
   }
@@ -583,23 +597,23 @@ function enemyDefeated(enemy) {
   updateLegend();
 }
 
-function resetGame() {
-  game.defeatedEnemies = [];
-  enemies = [];
-  game.busyCoordinates = [];
-  game.shadow = [];
-  map = [];
+Game.prototype.reset = function() {
+  this.defeatedEnemies = 0;
+  this.enemies = [];
+  this.busyCoordinates = [];
+  this.shadow = [];
+  this.map = [];
 }
 
 function userWins() {
   alert("YOU CONQUERED THE DUNGEON!");
-  resetGame();
+  game.reset();
   startGame();
 };
 
 function gameOver() {
   alert("GAME OVER");
-  resetGame();
+  game.reset();
   startGame();
 };
 
@@ -692,7 +706,6 @@ function updatePlayerPosition(oldX, oldY, newX, newY) {
     }
   }
 }
-
 function toggleShadow() {
   game.isShadowToggled = !game.isShadowToggled;
   drawMap(0, 0, COLS, ROWS);
