@@ -93,25 +93,25 @@ const STARTING_WEAPONS_AMOUNT = 3;
 
 
 function addStat(label, container) {
-  let el = document.createElement('b');
+  let el = document.createElement('li');
 
   let id = label.toLowerCase();
 
   let value = '0';
 
-  el.innerHTML = `<label>${label}</label>: <span id="${id}" ${value}></span> - `;
+  el.innerHTML = `<label>${label}</label>: <span id="${id}" ${value}></span>`
 
   container.appendChild(el);
-  
   return container;
-
 }
 
 function createDOM() {
 
     let container = document.getElementById('container');
 
-    let legend = document.createElement('div');
+    let legend = document.createElement('ul');
+
+    legend.id = 'legend';
 
     let labels = ['XP','Level','Health','Weapon','Damage','Enemies'];
 
@@ -135,6 +135,14 @@ function createDOM() {
       toggleShadow();
     }
     container.appendChild(button);
+
+    let btn = document.createElement('button');
+    btn.className = 'toggle';
+    btn.textContent = 'Toggle';
+    btn.onclick = function() {
+      toggleShadow();
+    }
+    container.appendChild(btn);
 
     // map
 
