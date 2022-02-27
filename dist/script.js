@@ -246,50 +246,47 @@ function generateMap() {
    // and the total number of penalties made
    var tiles = 0, penalties = 0;
    var x = 0,y = 0;
+
    const MAX_PENALTIES_COUNT = 1000;
    const MINIMUM_TILES_AMOUNT = 1000;
+
    const OUTER_LIMIT = 3;
    const moveToCenter = () => {
       x = COLS / 2;
       y = ROWS / 2;
    }
+   const randomDirection = () => {
+      const directions = [-1, 1];
+      let idx = Math.floor(Math.random() * directions.length);
+      return directions[idx];
+   }
    moveToCenter();
 
    const limit = 30000;
-   const directions = [-1, 1];
 
    for (var i = 0; i < limit; i++) {
 
-      // choose a random index
-      let d_idx = Math.floor(Math.random() * directions.length);
-
-
-
       // use it to get a random direction
-      var dig_direction = directions[d_idx];
+      var dig_direction = randomDirection();
 
       let axis = Math.random() < 0.5 ? 'horiz' : 'vert';
 
-      console.log('direction: ' + dig_direction + ' axis: ' + axis);
+   
       if (axis == 'horiz') {
          x += dig_direction;
 
          // while on far left or far right
          // we don't want to dig here so let's find a way to get out
          while (x <= OUTER_LIMIT || x >= COLS - OUTER_LIMIT - 1) {
-            let x_idx = Math.floor(Math.random() * directions.length);
-            x += directions[x_idx];
-            penalties++;
-            if (penalties > MAX_PENALTIES_COUNT) {
-               if (tiles < MINIMUM_TILES_AMOUNT) {
-                  // bring coords back to center
-                  moveToCenter();
 
-               } else {
-                  // if we've met our minimum, let's finish.
-                  console.log('returning...');
+            x += randomDirection(); penalties++;
+
+            if (penalties > MAX_PENALTIES_COUNT) {
+               if (tiles >= MINIMUM_TILES_AMOUNT) {
                   return;
                }
+                  // bring coords back to center
+               moveToCenter();
             }
          }
       } else {
@@ -300,18 +297,16 @@ function generateMap() {
          // so every time we add a floor here, we
          // while near the top or the bottom
          while (y <= OUTER_LIMIT || y >= ROWS - OUTER_LIMIT - 1) {
-            let y_idx = Math.floor(Math.random() * directions.length);
-            y += directions[y_idx];
-            penalties++;
+
+            y += randomDirection(); penalties++;
+
             if (penalties > MAX_PENALTIES_COUNT) {
                // if we still have tiles
-               if (tiles < MINIMUM_TILES_AMOUNT) {
-                  // start again at the center
-                  moveToCenter();
-               } else {
-                  console.log('returning...');
+               if (tiles >= MINIMUM_TILES_AMOUNT) {
                   return;
                }
+               moveToCenter();
+             
             }
          }
       }
@@ -328,23 +323,27 @@ function generateMap() {
    } // end the large loop
 }
 
-const checkLimits = (pos, cells)=> { 
-     while (pos <= OUTER_LIMIT || pos >= cells - OUTER_LIMIT - 1) {
+const checkLimits = (pos, numCells) => { 
+     while (pos <= OUTER_LIMIT || pos >= numCells - OUTER_LIMIT - 1) {
+
          let idx = Math.floor(Math.random() * directions.length);
-         pos += directions[y_idx];
+
+         pos += directions[idx];
+
          penalties++;
          
          if (penalties > MAX_PENALTIES_COUNT) {
                // if we still have tiles
             if (tiles < MINIMUM_TILES_AMOUNT) {
                   // start again at the center
-                  moveToCenter();
+               moveToCenter();
             }
             else {
-               return;
+               return null;
             }
          }
       }
+      return pos;
 
 }
 
