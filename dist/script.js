@@ -10,8 +10,6 @@ class Player {
     this.xp = xp;
   }
 }
-
-
 class Enemy {
   constructor(health, coords, damage) {
     this.health = health;
@@ -19,7 +17,6 @@ class Enemy {
     this.damage = damage;
   }
 }
-
 class Game {
   constructor() {
     this.map = [];
@@ -95,77 +92,63 @@ const STARTING_WEAPONS_AMOUNT = 3;
 // game object
 
 
+function addStat(label, container) {
+  let el = document.createElement('b');
 
-/**
- *  DOM Population
- */ 
-var Button = React.createClass({ displayName: "Button",
-  action: function () {
-    toggleShadow();
-  },
-  render: function () {
-    return React.createElement("button", 
-      { className: this.props.class, 
-        onClick: this.action 
-      }, this.props.text);
-  } });
+  let id = label.toLowerCase();
 
-var Map = React.createClass({ displayName: "Map",
-  render: function () {
-    return (
-      React.createElement("canvas", { id: "grid", width: "801px", height: "601px" }));
+  let value = '0';
 
-  } });
-var Legend = React.createClass({ displayName: "Legend",
-  render: function () {
-    return (
-      React.createElement("div", null, 
-      React.createElement("div", null, React.createElement("h2", null, 
+  el.innerHTML = `<label>${label}</label>: <span id="${id}" ${value}></span> - `;
 
-      React.createElement("b", null, "XP"), ": ", React.createElement("span", { id: "xp" }, "0"), " - ", 
-      React.createElement("b", null, "Level"), ": ", React.createElement("span", { id: "level" }, "0"), " - ", 
-      React.createElement("b", null, "Health"), ": ", React.createElement("span", { id: "health" }, "0"), " - ", 
-      React.createElement("b", null, "Weapon"), ": ", React.createElement("span", { id: "weapon" }, "0"), " - ", 
-      React.createElement("b", null, "Damage"), ": ", React.createElement("span", { id: "damage" }, "0"))), 
-      React.createElement("h3", null, "Enemies left: ", React.createElement("span", { id: "enemies" }, "0"))));
+  container.appendChild(el);
+  
+  return container;
 
-  } });
+}
 
-/**
- * Create the whole game layout
- */ 
-var View = React.createClass({ displayName: "View",
-  render: function () {
-    return (
-      // parent element
-      React.createElement("div", null, 
-      // child elements - 
-      React.createElement(Legend, null), 
-      React.createElement(Map, null), 
-      React.createElement(Button, { class: "btn btn-success", text: "Toggle Shadow" })
-        ) // end parent element
-      ); // end return
-  } });
+function createDOM() {
+
+    let container = document.getElementById('container');
+
+    let legend = document.createElement('div');
+
+    let labels = ['XP','Level','Health','Weapon','Damage','Enemies'];
+
+    for (var label of labels) {
+      legend = addStat(label, legend);
+    }
+    container.appendChild(legend);
+
+    // add canvas
+    let canvas = document.createElement('canvas');
+    canvas.id = 'grid';
+    canvas.height = 601;
+    canvas.width = 801;
+    container.appendChild(canvas);
+
+    // add button
+    let button = document.createElement('button');
+    button.className = 'btn btn-success';
+    button.textContent = 'Toggle Shadow';
+    button.onclick = function() {
+      toggleShadow();
+    }
+    container.appendChild(button);
+
+    // map
 
 
-React.render( React.createElement(View, null),
-document.getElementById('container'));
-
-
-
-
-
+}
+createDOM();
 /**
  *  HTML5 Canvas
  */ 
 var game = new Game();
 game.canvas = document.getElementById("grid");
 game.context = game.canvas.getContext("2d");
-
-
-
-// player and weapon
-var player;
+// the player gets instantiated in another function.
+var player = null;
 
 // global shadow status
 
@@ -499,6 +482,8 @@ function addObjToMap(coords, identifier) {
 }
 
 function drawObject(x, y, color) {
+  console.log('draw object with ' + game.context);
+  game.context.clearRect(x * 10, y * 10, 10, 10);
   game.context.beginPath();
   game.context.rect(x * 10, y * 10, 10, 10);
   game.context.fillStyle = color;
