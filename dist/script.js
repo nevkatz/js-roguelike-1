@@ -427,25 +427,17 @@ function drawMap(startX, startY, endX, endY) {
 /**
  * Coordinate Helper Functions
  */ 
-function areCoordsFree(x, y) {
-   // testfor wall
-   if (game.map[y][x] != FLOOR_CODE) {
-      return false;
-   }
-
-   return true;
-}
-
 
 function generateValidCoords() {
 
-   var x = Math.floor(Math.random() * COLS);
-   var y = Math.floor(Math.random() * ROWS);
+   var x, y;
 
-   while (!areCoordsFree(x, y)) {
+   do {
       x = Math.floor(Math.random() * COLS);
       y = Math.floor(Math.random() * ROWS);
    }
+   while (game.map[y][x] != FLOOR_CODE);
+ 
    return {
       x: x,
       y: y
