@@ -76,6 +76,14 @@ Game.prototype.reset = function() {
    this.shadow = [];
    this.map = [];
 }
+// set the given coords as busy + the 8 neighbors
+Game.prototype.addBusyCoords = function(x, y) {
+   this.busyCoordinates.push({
+      x: x,
+      y: y
+   });
+}
+
 /**
  * Constants
  */
@@ -213,7 +221,7 @@ function startGame() {
 
    generateMap();
 
-   setTimeout(gameSetUp(), 1000);
+   setTimeout(gameSetUp, 1000);
 
    function gameSetUp() {
       generatePlayer();
@@ -222,7 +230,7 @@ function startGame() {
       generatePotions(STARTING_POTIONS_AMOUNT);
       generateShadow();
       drawMap(0, 0, COLS, ROWS);
-      updateLegend();
+      updateStats();
    }
 }
 
@@ -244,76 +252,59 @@ function generateMap() {
    }
    // set up total number of tiles used
    // and the total number of penalties made
-   var tiles = 0, penalties = 0;
-   var x = 0,y = 0;
-
-   const MAX_PENALTIES_COUNT = 1000;
-   const MINIMUM_TILES_AMOUNT = 1000;
-
-   const OUTER_LIMIT = 3;
-   const moveToCenter = () => {
-      x = COLS / 2;
-      y = ROWS / 2;
-   }
-   const randomDirection = () => {
-      const directions = [-1, 1];
-      let idx = Math.floor(Math.random() * directions.length);
-      return directions[idx];
-   }
-   moveToCenter();
-
-   const limit = 30000;
-
-   for (var i = 0; i < limit; i++) {
-
-      // use it to get a random direction
-      var dig_direction = randomDirection();
-
-      let axis = Math.random() < 0.5 ? 'horiz' : 'vert';
 
    
-      if (axis == 'horiz') {
-         x += dig_direction;
+   let pos = { 
+      x:COLS/2,
+      y:ROWS/2
+   };
 
-         // while on far left or far right
-         // we don't want to dig here so let's find a way to get out
-         while (x <= OUTER_LIMIT || x >= COLS - OUTER_LIMIT - 1) {
+   const ATTEMPTS = 30000;
+   const MAX_PENALTIES_COUNT = 1000;
+   const MINIMUM_TILES_AMOUNT = 1000;
+   const OUTER_LIMIT = 3;
 
-            x += randomDirection(); penalties++;
+   const randomDirection = () => Math.random() <= 0.5 ? -1 : 1;
+
+   let tiles = 0, penalties = 0;
+
+   for (var i = 0; i < ATTEMPTS; i++) {
+
+      // choose an axis to dig on.
+      let axis = Math.random() <= 0.5 ? 'x' : 'y';
+
+      // get the number of rows or columns, depending on the axis.
+      let numCells = axis == 'x' ? COLS : ROWS;
+
+      // choose the positive or negative direction.
+      pos[axis] += randomDirection();
+
+      // if we are on the far left or far right, find another value.
+
+      // we don't want to dig here so let's find a way to get out
+      while (pos[axis] < OUTER_LIMIT || pos[axis] >= numCells - OUTER_LIMIT) {
+
+            pos[axis] += randomDirection();
+
+            penalties++;
 
             if (penalties > MAX_PENALTIES_COUNT) {
+
+               // if we have used up our tiles, we're done.
                if (tiles >= MINIMUM_TILES_AMOUNT) {
                   return;
                }
                   // bring coords back to center
-               moveToCenter();
+               pos.x = COLS / 2;
+               pos.y = ROWS / 2;
             }
-         }
-      } else {
+      } 
 
-         y += dig_direction;
+      let {x, y} = pos;
 
-         // we only want to stay at the outer boundeary for so long,
-         // so every time we add a floor here, we
-         // while near the top or the bottom
-         while (y <= OUTER_LIMIT || y >= ROWS - OUTER_LIMIT - 1) {
-
-            y += randomDirection(); penalties++;
-
-            if (penalties > MAX_PENALTIES_COUNT) {
-               // if we still have tiles
-               if (tiles >= MINIMUM_TILES_AMOUNT) {
-                  return;
-               }
-               moveToCenter();
-             
-            }
-         }
-      }
-      console.log(`checking (${x},${y})`);
       // if not a floor, make this a floor
       if (game.map[y][x] != FLOOR_CODE) {
-         console.log(`(${x},${y}) is now a floor`);
+
          game.map[y][x] = FLOOR_CODE;
          // we use up a tile.
          tiles++;
@@ -321,30 +312,6 @@ function generateMap() {
       penalties = 0;
 
    } // end the large loop
-}
-
-const checkLimits = (pos, numCells) => { 
-     while (pos <= OUTER_LIMIT || pos >= numCells - OUTER_LIMIT - 1) {
-
-         let idx = Math.floor(Math.random() * directions.length);
-
-         pos += directions[idx];
-
-         penalties++;
-         
-         if (penalties > MAX_PENALTIES_COUNT) {
-               // if we still have tiles
-            if (tiles < MINIMUM_TILES_AMOUNT) {
-                  // start again at the center
-               moveToCenter();
-            }
-            else {
-               return null;
-            }
-         }
-      }
-      return pos;
-
 }
 
 function generatePotions(amount) {
@@ -373,7 +340,7 @@ function generateWeapons(amount) {
  * use an array for the first three
  * use standalone functions for the others
  */
-function updateLegend() {
+function updateStats() {
 
    let player_props = ['xp', 'level', 'health'];
 
@@ -457,34 +424,24 @@ function drawMap(startX, startY, endX, endY) {
    }
 }
 
+/**
+ * Coordinate Helper Functions
+ */ 
 function areCoordsFree(x, y) {
-   if (game.map[y][x] != 1) {
+   // testfor wall
+   if (game.map[y][x] != FLOOR_CODE) {
       return false;
    }
-   for (var i = 0; i < game.busyCoordinates.length; i++) {
-      try {
-         if (game.busyCoordinates[i].x == x && game.busyCoordinates[i].y == y) {
-            return false;
-         }
-      } catch (e) {
-         console.log("Error: " + e);
-      }
-   }
+
    return true;
 }
 
-// set the given coords as busy + the 8 neighbors
-function addBusyCoords(x, y) {
-   game.busyCoordinates.push({
-      x: x,
-      y: y
-   });
-
-}
 
 function generateValidCoords() {
+
    var x = Math.floor(Math.random() * COLS);
    var y = Math.floor(Math.random() * ROWS);
+
    while (!areCoordsFree(x, y)) {
       x = Math.floor(Math.random() * COLS);
       y = Math.floor(Math.random() * ROWS);
@@ -520,21 +477,29 @@ function generateEnemies(amount) {
 
 function generatePlayer() {
    var coords = generateValidCoords();
+
+   // level, health, weapon, coords, xp
    player = new Player(1, 100, WEAPONS[0], coords, 30);
-   addObjToMap(player.coords, 2);
+
+   addObjToMap(player.coords, PLAYER_CODE);
 }
 
 // add given coords to map 
 // make the coords and neighbors busy
 // and draw object with given color
-function addObjToMap(coords, identifier) {
-   game.map[coords.y][coords.x] = identifier;
-   addBusyCoords(coords.x, coords.y);
+function addObjToMap(coords, tileCode) {
+   game.map[coords.y][coords.x] = tileCode
+   game.addBusyCoords(coords.x, coords.y);
 }
 
+/**
+ * @param {Number} x
+ * @param {Number} y
+ * @param {String} color
+ */ 
 function drawObject(x, y, color) {
 
-   game.context.clearRect(x * 10, y * 10, 10, 10);
+ //  game.context.clearRect(x * 10, y * 10, 10, 10);
    game.context.beginPath();
    game.context.rect(x * TILE_DIM, y * TILE_DIM, TILE_DIM, TILE_DIM);
    game.context.fillStyle = color;
@@ -592,7 +557,7 @@ function addKeyboardListener() {
          // update player position
          updatePlayerPosition(player.coords.x, player.coords.y, x, y);
 
-         updateLegend();
+         updateStats();
 
          drawMap(oldX - VISIBILITY - 1, oldY - VISIBILITY - 1, x + VISIBILITY + 2, y + VISIBILITY + 2);
       }
@@ -610,7 +575,7 @@ function fightEnemy(enemy) {
    }
    enemy.health -= player.weapon.damage;
    player.health -= enemy.damage;
-   updateLegend();
+   updateStats();
 }
 
 function enemyDefeated(enemy) {
@@ -638,7 +603,7 @@ function enemyDefeated(enemy) {
 
       player.level++;
    }
-   updateLegend();
+   updateStats();
 }
 
 
