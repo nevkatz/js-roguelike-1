@@ -517,9 +517,12 @@ function addKeyboardListener() {
       }
       // check if next spot is enemy
       if (game.map[y][x] == ENEMY_CODE) {
-         fightEnemy(game.enemies.find(function(item => item.coords.x == x && item.coords.y == y);
+
+         let enemy = game.enemies.find(enemy => enemy.coords.x == x && enemy.coords.y == y);
+
+         fightEnemy(enemy);
       } 
-      else if (game.map[y][x] != 0) {
+      else if (game.map[y][x] != FLOOR_CODE) {
          // if next spot is potion
          if (game.map[y][x] == POTION_CODE) {
 
