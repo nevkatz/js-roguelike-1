@@ -126,6 +126,21 @@ const TOTAL_ENEMIES = 10;
 const STARTING_POTIONS_AMOUNT = 4;
 const STARTING_WEAPONS_AMOUNT = 3;
 
+const TILE_COLORS = [
+        // wall
+      'grey',
+      // floor
+      'white',
+      // player
+      'blue',
+      // enemy
+      'red',
+      // health drop
+      'green',
+      // weapon
+      'orange'
+];
+
 // game object
 
 /**
@@ -214,9 +229,9 @@ function startGame() {
 
    function gameSetUp() {
       generatePlayer();
-      generateWeapons(STARTING_WEAPONS_AMOUNT);
+      generateItems(STARTING_WEAPONS_AMOUNT, WEAPON_CODE);
+      generateItems(STARTING_POTIONS_AMOUNT, POTION_CODE);
       generateEnemies(TOTAL_ENEMIES);
-      generatePotions(STARTING_POTIONS_AMOUNT);
       generateShadow();
       drawMap(0, 0, COLS, ROWS);
       updateStats();
@@ -303,22 +318,18 @@ function generateMap() {
    } // end the large loop
 }
 
-function generatePotions(amount) {
-   for (var i = 0; i < amount; i++) {
-      var coords = generateValidCoords();
-      addObjToMap(coords, 4);
+/**
+ * @param {Number} quantity - the number of items to generate
+ * @param {Number} tileCode - corresponds to a constant, such as POTION_CODE.
+ *                            used to index into the TILE_COLORS array
+ */ 
+function generateItems(quantity, tileCode) {
+   for (var i = 0; i < quantity; i++) {
+      let coords = generateValidCoords();
+      addObjToMap(coords, tileCode);
       if (!game.isShadowToggled) {
-         drawObject(coords.x, coords.y, "green");
-      }
-   }
-}
-
-function generateWeapons(amount) {
-   for (var i = 0; i < amount; i++) {
-      var coords = generateValidCoords();
-      addObjToMap(coords, 5);
-      if (!game.isShadowToggled) {
-         drawObject(coords.x, coords.y, "orange");
+         let color = TILE_COLORS[tileCode];
+         drawObject(coords.x, coords.y, color);
       }
    }
 }
@@ -376,21 +387,6 @@ function updateStats() {
  */
 function drawMap(startX, startY, endX, endY) {
 
-   let colors = [
-      // wall
-      'grey',
-      // floor
-      'white',
-      // player
-      'blue',
-      // enemy
-      'red',
-      // health drop
-      'green',
-      // weapon
-      'orange'
-   ];
-
    // loop through all cells of the map
    for (var row = startY; row < endY; row++) {
 
@@ -405,7 +401,7 @@ function drawMap(startX, startY, endX, endY) {
          } else {
             let c_idx = game.map[row][col];
 
-            color = colors[c_idx];
+            color = TILE_COLORS[c_idx];
          }
          drawObject(col, row, color);
 
@@ -521,9 +517,7 @@ function addKeyboardListener() {
       }
       // check if next spot is enemy
       if (game.map[y][x] == ENEMY_CODE) {
-         fightEnemy(game.enemies.filter(function(item) {
-            return item.coords.x == x && item.coords.y == y;
-         })[0]);
+         fightEnemy(game.enemies.find(function(item => item.coords.x == x && item.coords.y == y);
       } 
       else if (game.map[y][x] != 0) {
          // if next spot is potion
@@ -532,14 +526,14 @@ function addKeyboardListener() {
             player.health += pickRandom(POTIONS);
 
             removeObjFromMap(x, y);
-            generatePotions(1);
+            generateItems(1, POTION_CODE);
          // if next spot is weapon
          } else if (game.map[y][x] == WEAPON_CODE) {
 
             player.weapon = pickRandom(WEAPONS);
-            
+
             removeObjFromMap(x, y);
-            generateWeapons(1);
+            generateItems(1, WEAPON_CODE);
          }
          // update player position
          updatePlayerPosition(player.coords.x, player.coords.y, x, y);
