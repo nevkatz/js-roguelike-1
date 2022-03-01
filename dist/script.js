@@ -47,7 +47,6 @@ class Enemy {
  * @property {Number} defeatedEnemies - how many enemies have been defeated
  * @property {HTMLElement} canvas - the DOM element
  * @property {Object} context - the bundle of drawing methods tied to the canvas
- * @property {Object} busyCoordinates - stores coords already in use
  */
 class Game {
    constructor() {
@@ -62,7 +61,6 @@ class Game {
       this.canvas = null;
 
       this.context = null;
-      this.busyCoordinates = [];
    }
 }
 /**
@@ -72,18 +70,9 @@ class Game {
 Game.prototype.reset = function() {
    this.defeatedEnemies = 0;
    this.enemies = [];
-   this.busyCoordinates = [];
    this.shadow = [];
    this.map = [];
 }
-// set the given coords as busy + the 8 neighbors
-Game.prototype.addBusyCoords = function(x, y) {
-   this.busyCoordinates.push({
-      x: x,
-      y: y
-   });
-}
-
 /**
  * Constants
  */
@@ -444,6 +433,11 @@ function generateValidCoords() {
    };
 
 }
+function pickRandom(arr) {
+   let idx = Math.floor(Math.random() * arr.length);
+
+   return arr[idx];
+}
 /**
  * @param {Number} amount
  * 
@@ -453,17 +447,15 @@ function generateEnemies(amount) {
       // generate valid coordinates.
       let coords = generateValidCoords();
 
-      let h_idx = Math.floor(Math.random() * ENEMIES_HEALTH.length);
+      let health = pickRandom(ENEMIES_HEALTH);
 
-      let d_idx = Math.floor(Math.random() * ENEMIES_DAMAGE.length);
+      let damage = pickRandom(ENEMIES_DAMAGE);
 
-      let health = ENEMIES_HEALTH[h_idx];
+      let enemy = new Enemy(health, coords, damage);
 
-      let damage = ENEMIES_DAMAGE[d_idx];
+      game.enemies.push(enemy);
 
-      game.enemies.push(new Enemy(health, coords, damage));
-
-      addObjToMap(coords, 3);
+      addObjToMap(coords, ENEMY_CODE);
    }
 }
 
@@ -480,8 +472,7 @@ function generatePlayer() {
 // make the coords and neighbors busy
 // and draw object with given color
 function addObjToMap(coords, tileCode) {
-   game.map[coords.y][coords.x] = tileCode
-   game.addBusyCoords(coords.x, coords.y);
+   game.map[coords.y][coords.x] = tileCode;
 }
 
 /**
@@ -537,12 +528,16 @@ function addKeyboardListener() {
       else if (game.map[y][x] != 0) {
          // if next spot is potion
          if (game.map[y][x] == POTION_CODE) {
-            player.health += POTIONS[Math.floor(Math.random() * POTIONS.length)];
+
+            player.health += pickRandom(POTIONS);
+
             removeObjFromMap(x, y);
             generatePotions(1);
          // if next spot is weapon
          } else if (game.map[y][x] == WEAPON_CODE) {
-            player.weapon = WEAPONS[Math.floor(Math.random() * WEAPONS.length)];
+
+            player.weapon = pickRandom(WEAPONS);
+            
             removeObjFromMap(x, y);
             generateWeapons(1);
          }
@@ -655,6 +650,10 @@ function generateShadow() {
  * Removes old player square from map
  * Adds new square
  * resets shadow
+ * @param {Number} oldX
+ * @param {Number} oldY
+ * @param {Number} newX
+ * @param {Number} newY
  */
 function updatePlayerPosition(oldX, oldY, newX, newY) {
    removeObjFromMap(oldX, oldY);
