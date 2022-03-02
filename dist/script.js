@@ -522,7 +522,7 @@ function addKeyboardListener() {
 
          fightEnemy(enemy);
       } 
-      else if (game.map[y][x] != FLOOR_CODE) {
+      else if (game.map[y][x] != WALL_CODE) {
          // if next spot is potion
          if (game.map[y][x] == POTION_CODE) {
 
@@ -543,11 +543,16 @@ function addKeyboardListener() {
 
          updateStats();
 
-         drawMap(oldX - VISIBILITY - 1, oldY - VISIBILITY - 1, x + VISIBILITY + 2, y + VISIBILITY + 2);
+         let left = oldX - VISIBILITY - 1;
+         let top = oldY - VISIBILITY - 1;
+
+         let right = x + VISIBILITY + 2;
+         let bot = y + VISIBILITY + 2 ;
+
+         drawMap(left, top, right, bot);
       }
       e.preventDefault(); // prevent the default action (scroll / move caret)
    });
-
 }
 
 function fightEnemy(enemy) {
@@ -664,6 +669,7 @@ function updatePlayerPosition(oldX, oldY, newX, newY) {
    };
 
    let start = {}, end = {};
+
    /**
     * Update the game.shadow 2D array.
     */
@@ -682,6 +688,8 @@ function updatePlayerPosition(oldX, oldY, newX, newY) {
       start.y = newY - VISIBILITY;
       end.y = oldY + VISIBILITY;
    }
+
+
    for (var row = start.y; row <= end.y; row++) {
       for (var col = start.x; col <= end.x; col++) {
 
