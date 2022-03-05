@@ -44,7 +44,6 @@ class Enemy {
  * @property {Array} map - 2D array storing integer codes
  * @property {Array} shadow - 2D array holding a map of the shadow
  * @property {Boolean} isShadowToggled - is shadow on or off? 
- * @property {Number} defeatedEnemies - how many enemies have been defeated
  * @property {HTMLElement} canvas - the DOM element
  * @property {Object} context - the bundle of drawing methods tied to the canvas
  */
@@ -54,8 +53,7 @@ class Game {
       this.map = [];
       this.shadow = [];
 
-      this.isShadowToggled = false;
-      this.defeatedEnemies = 0;
+      this.isShadowToggled = true;
 
       this.enemies = [];
       this.canvas = null;
@@ -68,7 +66,6 @@ class Game {
  * 
  */
 Game.prototype.reset = function() {
-   this.defeatedEnemies = 0;
    this.enemies = [];
    this.shadow = [];
    this.map = [];
@@ -94,7 +91,8 @@ const WEAPONS = [{
    }
 ];
 
-
+SHADOW_CODE = 0;
+VISIBLE_CODE = 1;
 
 const WALL_CODE = 0;
 const FLOOR_CODE = 1;
@@ -111,6 +109,8 @@ const ENEMIES_HEALTH = [30, 30, 30, 30, 40, 40, 60, 80];
 // possible damage that enemies can inflict
 const ENEMIES_DAMAGE = [30, 30, 30, 30, 40, 40, 60, 80];
 
+const POINTS_PER_LEVEL = 100;
+
 // the visible area
 const VISIBILITY = 3;
 
@@ -123,8 +123,8 @@ const TILE_DIM = 10;
 
 // total enemies
 const TOTAL_ENEMIES = 10;
-const STARTING_POTIONS_AMOUNT = 4;
-const STARTING_WEAPONS_AMOUNT = 3;
+const STARTING_POTIONS_AMOUNT = 40;
+const STARTING_WEAPONS_AMOUNT = 30;
 
 const TILE_COLORS = [
         // wall
@@ -229,10 +229,10 @@ function startGame() {
 
    function gameSetUp() {
       generatePlayer();
+      generateShadow();
       generateItems(STARTING_WEAPONS_AMOUNT, WEAPON_CODE);
       generateItems(STARTING_POTIONS_AMOUNT, POTION_CODE);
       generateEnemies(TOTAL_ENEMIES);
-      generateShadow();
       drawMap(0, 0, COLS, ROWS);
       updateStats();
    }
@@ -266,7 +266,7 @@ function generateMap() {
    const ATTEMPTS = 30000;
    const MAX_PENALTIES_COUNT = 1000;
    const MINIMUM_TILES_AMOUNT = 1000;
-   const OUTER_LIMIT = 3;
+   const OUTER_LIMIT = 1;
 
    const randomDirection = () => Math.random() <= 0.5 ? -1 : 1;
 
@@ -325,9 +325,14 @@ function generateMap() {
  */ 
 function generateItems(quantity, tileCode) {
    for (var i = 0; i < quantity; i++) {
+
       let coords = generateValidCoords();
+
       addObjToMap(coords, tileCode);
-      if (!game.isShadowToggled) {
+
+      if (!game.isShadowToggled || 
+           game.shadow[coords.y][coords.x] == VISIBLE_CODE) {
+
          let color = TILE_COLORS[tileCode];
          drawObject(coords.x, coords.y, color);
       }
@@ -360,20 +365,17 @@ function updateStats() {
       }
    ];
 
-
    for (var prop of weapon_props) {
 
-      let {
-         domId,
-         key
-      } = prop;
+      let {domId,key} = prop;
 
       let el = document.getElementById(domId);
 
       el.textContent = player.weapon[key];
    }
+   let enemyStats = document.querySelector("#enemies")
 
-   document.querySelector("#enemies").textContent = TOTAL_ENEMIES - game.defeatedEnemies;
+   enemyStats.textContent = game.enemies.length;
 }
 
 
@@ -395,9 +397,10 @@ function drawMap(startX, startY, endX, endY) {
          let color = null;
 
          // if shadow is on and the shadow is down....
-         if (game.isShadowToggled && game.shadow[row][col] == 0) {
+         if (game.isShadowToggled && game.shadow[row][col] == SHADOW_CODE) {
             // simply draw black.
             color = 'black';
+
          } else {
             let c_idx = game.map[row][col];
 
@@ -518,7 +521,10 @@ function addKeyboardListener() {
       // check if next spot is enemy
       if (game.map[y][x] == ENEMY_CODE) {
 
-         let enemy = game.enemies.find(enemy => enemy.coords.x == x && enemy.coords.y == y);
+         const matching_coords = (enemy) => {
+            return enemy.coords.x == x && enemy.coords.y == y;
+         }
+         let enemy = game.enemies.find(matching_coords);
 
          fightEnemy(enemy);
       } 
@@ -559,40 +565,55 @@ function fightEnemy(enemy) {
    if (player.health - enemy.damage <= 0) {
       gameOver();
       return;
-   } else if (enemy.health - player.weapon.damage <= 0) {
+   }
+   if (enemy.health - player.weapon.damage <= 0) {
       enemyDefeated(enemy);
    }
-   enemy.health -= player.weapon.damage;
+   else {
+      enemy.health -= player.weapon.damage;
+   }
    player.health -= enemy.damage;
    updateStats();
 }
 
 function enemyDefeated(enemy) {
-   game.defeatedEnemies++;
-   // check to see if player won
-   if (game.defeatedEnemies == TOTAL_ENEMIES) {
-      userWins();
-      return;
-   }
-   // remove enemy from map.
+
+   // remove enemy from  2D array
    removeObjFromMap(enemy.coords.x, enemy.coords.y);
 
-   drawMap(enemy.coords.x - 1, enemy.coords.y - 1, enemy.coords.x + 1, enemy.coords.y + 1);
+   let left = enemy.coords.x - 1;
+   let top = enemy.coords.y - 1
+   let right = enemy.coords.x + 1;
+   let bot = enemy.coords.y + 1;
+   // remove ane enemy from the visible map.
+   drawMap(left, top, right, bot);
 
-   // remove enemy from enemies array
+   // add experience points
+   player.xp += parseInt((enemy.damage + enemy.health)/2);
 
-   let e_idx = game.enemies.indexOf(enemy);
-
-   game.enemies.slice(e_idx, 1);
-
-   player.xp += 50;
+   // calculate the level in points. Level 1 has no experience so machine-wise it is level 0.
+   let level_in_points = POINTS_PER_LEVEL * (player.level - 1)
 
    // level up if needed.
-   if (player.xp - 100 * (player.level - 1) >= 100) {
+   if (player.xp - level_in_points >= POINTS_PER_LEVEL) {
 
       player.level++;
    }
+
+   // remove enemy from enemies array
+   let e_idx = game.enemies.indexOf(enemy);
+
+   // remove enemy from array
+   game.enemies.slice(e_idx, 1);
+
+
+   // update stats
    updateStats();
+
+   // if no enemies, user wins
+   if (game.enemies.length == 0) {
+      userWins();
+   }
 }
 
 
@@ -616,22 +637,24 @@ function removeObjFromMap(x, y) {
 
 
 /**
- * Generates a shadow based on the player's position.
+ * Generates a shadow in the 2D array based on the player's position.
  */
 function generateShadow() {
-   // generate start coordinates
-
-   // ternary compares player coords with boundary of map.
-
-   let start = {},
-      end = {};
-
-   start.x = player.coords.x - VISIBILITY < 0 ? 0 : player.coords.x - VISIBILITY;
-   start.y = player.coords.y - VISIBILITY < 0 ? 0 : player.coords.y - VISIBILITY;
 
 
-   end.x = player.coords.x + VISIBILITY >= COLS ? COLS - 1 : player.coords.x + VISIBILITY;
-   end.y = player.coords.y + VISIBILITY >= ROWS ? ROWS - 1 : player.coords.y + VISIBILITY;
+   let start = {}, end = {};
+
+   let left_edge = player.coords.x - VISIBILITY;
+   let top_edge = player.coords.y - VISIBILITY;
+
+   start.x = left_edge < 0 ? 0 : left_edge;
+   start.y = top_edge < 0 ? 0 : top_edge;
+
+   let right_edge = player.coords.x + VISIBILITY;
+   let bot_edge = player.coords.y + VISIBILITY;
+
+   end.x = right_edge  >= COLS ? COLS - 1 : right_edge;
+   end.y = bot_edge >= ROWS ? ROWS - 1 : bot_edge;
 
    // iterate through all squares on the map
    for (var row = 0; row < ROWS; row++) {
@@ -639,10 +662,10 @@ function generateShadow() {
       for (var col = 0; col < COLS; col++) {
          // if this falls within visible region, push 1
          if (row >= start.y && row <= end.y && col >= start.x && col <= end.x) {
-            game.shadow[row].push(1);
+            game.shadow[row].push(VISIBLE_CODE);
             // else, push 0
          } else {
-            game.shadow[row].push(0);
+            game.shadow[row].push(SHADOW_CODE);
          }
       }
    }
@@ -670,25 +693,36 @@ function updatePlayerPosition(oldX, oldY, newX, newY) {
 
    let start = {}, end = {};
 
-   /**
-    * Update the game.shadow 2D array.
-    */
-   start.x = oldX - VISIBILITY < 0 ? 0 : oldX - VISIBILITY;
-   start.y = oldY - VISIBILITY < 0 ? 0 : oldY - VISIBILITY;
+   // if player is going right and down
+   let old_left = oldX - VISIBILITY;  
+   let old_top = oldY - VISIBILITY;
 
-   // set ending coordinates
-   end.x = newX + VISIBILITY >= COLS ? COLS - 1 : newX + VISIBILITY;
-   end.y = newY + VISIBILITY >= ROWS ? ROWS - 1 : newY + VISIBILITY;
+   start.x = old_left < 0 ? 0 : old_left;
+   start.y = old_top < 0 ? 0 : old_top;
 
+   let new_right = newX + VISIBILITY;
+   let new_bot = newY + VISIBILITY;
+
+   end.x = new_right >= COLS ? COLS - 1 : new_right;
+   end.y = new_bot >= ROWS ? ROWS - 1 : new_bot;
+
+   // if player is moving left
    if (oldX > newX) {
+      // use newX rather than oldX as the left edge of the square.
       start.x = newX - VISIBILITY;
+      // make sure to turn the right part of the square black
+      // the right edge of the square is more to the right.
       end.x = oldX + VISIBILITY;
    }
+   // if player is moving up
    if (oldY > newY) {
+      // newY is less so it's better to use it than oldY
+      // the top edge of the rendering area is higher
+      // make sure that you re-render the squares that have to change above the player
       start.y = newY - VISIBILITY;
+      // the bottom edge is lower
       end.y = oldY + VISIBILITY;
    }
-
 
    for (var row = start.y; row <= end.y; row++) {
       for (var col = start.x; col <= end.x; col++) {
@@ -698,10 +732,10 @@ function updatePlayerPosition(oldX, oldY, newX, newY) {
             col >= newX - VISIBILITY &&
             col <= newX + VISIBILITY) {
             // show shadow
-            game.shadow[row][col] = 1;
+            game.shadow[row][col] = VISIBLE_CODE;
          } else {
             // no shadow
-            game.shadow[row][col] = 0;
+            game.shadow[row][col] = SHADOW_CODE;
          }
       }
    }
