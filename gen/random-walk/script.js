@@ -330,6 +330,7 @@ function drawMap(startX, startY, endX, endY, mapId, src) {
 function drawObject(x, y, color, mapId) {
 
    if (game.mapId == mapId) {
+      
        game.context.beginPath();
        game.context.rect(x * TILE_DIM, y * TILE_DIM, TILE_DIM, TILE_DIM);
        game.context.fillStyle = color;

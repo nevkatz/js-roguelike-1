@@ -52,8 +52,9 @@ class Game {
 
       this.map = [];
       this.shadow = [];
+      this.rooms = [];
 
-      this.isShadowToggled = true;
+      this.isShadowToggled = false;
 
       this.enemies = [];
       this.canvas = null;
@@ -69,6 +70,56 @@ Game.prototype.reset = function() {
    this.enemies = [];
    this.shadow = [];
    this.map = [];
+}
+
+class Room {
+   constructor(start, end, id) {
+      this.start = start;
+      this.end = end;
+      this.id = id;
+      this.doors = 0;
+   }
+}
+/**
+ * 
+ * 
+r1.end.x > r2.start.x && 
+r1.start.x < r2.end.x &&
+
+r1.end.y > r2.start.y && 
+r1.start.y< r2.end.y
+
+ */ 
+Room.prototype.overlaps = function(room) {
+  let test1 = this.end.x > room.start.x &&
+                 this.start.x < room.end.x &&
+                 this.end.y > room.start.y &&
+                 this.start.y < room.end.y; 
+
+  let test2  = room.end.x > this.start.x &&
+               room.start.x < this.end.x &&
+               room.end.y > this.start.y &&
+               room.start.y < this.end.y;
+
+   console.log('test1: ' + test1 + ' test2: ' + test2);
+
+   return test1 || test2;
+}
+Room.prototype.inBounds = function() {
+
+   return this.start.x > OUTER_LIMIT &&
+          this.end.x < COLS - OUTER_LIMIT &&
+          this.start.y > OUTER_LIMIT &&
+          this.end.y < ROWS - OUTER_LIMIT;
+}
+Room.prototype.fillMap = function() {
+
+   for (var y = this.start.y; y <= this.end.y; ++y) {
+      for (var x = this.start.x; x <= this.end.x; ++x) {
+
+         game.map[y][x] == FLOOR_CODE;
+      }
+   }
 }
 /**
  * Constants
@@ -91,8 +142,8 @@ const WEAPONS = [{
    }
 ];
 
-SHADOW_CODE = 0;
-VISIBLE_CODE = 1;
+const SHADOW_CODE = 0;
+const VISIBLE_CODE = 1;
 
 const WALL_CODE = 0;
 const FLOOR_CODE = 1;
@@ -123,8 +174,8 @@ const TILE_DIM = 10;
 
 // total enemies
 const TOTAL_ENEMIES = 10;
-const STARTING_POTIONS_AMOUNT = 40;
-const STARTING_WEAPONS_AMOUNT = 30;
+const STARTING_POTIONS_AMOUNT = 4;
+const STARTING_WEAPONS_AMOUNT = 3;
 
 const TILE_COLORS = [
         // wall

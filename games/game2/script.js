@@ -79,7 +79,7 @@ class Game {
       this.map = [];
       this.shadow = [];
 
-      this.isShadowToggled = true;
+      this.isShadowToggled = false;
 
       this.enemies = [];
       this.canvas = null;
@@ -117,8 +117,8 @@ const WEAPONS = [{
    }
 ];
 
-SHADOW_CODE = 0;
-VISIBLE_CODE = 1;
+const SHADOW_CODE = 0;
+const VISIBLE_CODE = 1;
 
 const WALL_CODE = 0;
 const FLOOR_CODE = 1;
@@ -128,7 +128,11 @@ const POTION_CODE = 4;
 const WEAPON_CODE = 5;
 
 const POTIONS = [10, 20, 30, 40, 50];
+
+// possible health that enemies can have
 const ENEMIES_HEALTH = [30, 30, 30, 30, 40, 40, 60, 80];
+
+// possible damage that enemies can inflict
 const ENEMIES_DAMAGE = [30, 30, 30, 30, 40, 40, 60, 80];
 
 const POINTS_PER_LEVEL = 100;
@@ -145,8 +149,8 @@ const TILE_DIM = 10;
 
 // total enemies
 const TOTAL_ENEMIES = 10;
-const STARTING_POTIONS_AMOUNT = 40;
-const STARTING_WEAPONS_AMOUNT = 30;
+const STARTING_POTIONS_AMOUNT = 4;
+const STARTING_WEAPONS_AMOUNT = 3;
 
 const TILE_COLORS = [
         // wall
@@ -401,10 +405,6 @@ function updateStats() {
 }
 
 
-/**
- * 
- * 
- */ 
 /**
  *
  * @param {Number} startX
