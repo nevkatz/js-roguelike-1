@@ -75,6 +75,7 @@ class Enemy {
  */
 class Game {
    constructor() {
+      this.rooms = [];
       this.curRoomId = 0;
 
       this.map = [];
@@ -114,15 +115,16 @@ class Room {
 }
 
 Room.prototype.overlaps = function(room) {
-  let test1 = this.end.x > room.start.x &&
-                 this.start.x < room.end.x &&
-                 this.end.y > room.start.y &&
-                 this.start.y < room.end.y; 
+   let wall = 2;
+  let test1 = this.end.x + wall > room.start.x &&
+                 this.start.x - wall < room.end.x &&
+                 this.end.y + wall > room.start.y &&
+                 this.start.y - wall  < room.end.y; 
 
-  let test2  = room.end.x > this.start.x &&
-               room.start.x < this.end.x &&
-               room.end.y > this.start.y &&
-               room.start.y < this.end.y;
+  let test2  = room.end.x + wall > this.start.x &&
+               room.start.x - wall < this.end.x &&
+               room.end.y + wall > this.start.y &&
+               room.start.y - wall < this.end.y;
 
    console.log('test1: ' + test1 + ' test2: ' + test2);
 
@@ -316,7 +318,7 @@ function startGame() {
 
 
 function resetMap() {
-   console.log('resetMap');
+
    game.map = [];
    // generate a solid wall.
    for (var row = 0; row < ROWS; row++) {
@@ -337,7 +339,7 @@ function resetMap() {
  */ 
 function getDim () {
       const BASE_DIM = 10;
-      const EXTRA = 15;
+      const EXTRA = 30;
 
       let type = (Math.random() < 0.5) ? 'tall' : 'wide';
 
@@ -364,7 +366,7 @@ function getDim () {
  * 
  */ 
 function setCoords (center, width, height) {
-   console.log('setCoords');
+
 
    let halfW = parseInt(width/2);
    let halfH = parseInt(height/2);
@@ -400,12 +402,48 @@ function generateRoom(center, width, height) {
    return room;
 
 }
+function addRoom() {
+   const genCoord = (maxCells, dim) => {
+      // get limit on either side based on outer limit and a room dimension - width or height
+      let limit = OUTER_LIMIT + parseInt(dim/2);
+
+      // get range based on cells in array - limit on either side.
+      let range = maxCells - 2*limit;
+
+      // get a random  number within 
+      return limit + parseInt(Math.random()*range);
+   }
+   let {width, height} = getDim();
+
+   let coords = {
+      x:genCoord(COLS, width),
+      y:genCoord(ROWS, height)
+   }
+   
+   let room = generateRoom(coords, width, height);
+
+
+   for (var gameRoom of game.rooms) {
+
+      if (room.overlaps(gameRoom)) {
+         console.log('room '+room.id+' overlaps...');
+         return false;
+      }
+
+   }
+
+   console.log('adding ' + room.id);
+   room.fillMap();
+   game.rooms.push(room);
+   return true;
+
+}
 /**
  * Generates a series of map rooms
  * 
  */ 
 function generateMapRooms() {
-   console.log('generate Map Rooms');
+
    resetMap();
 
    let center = { 
@@ -419,28 +457,14 @@ function generateMapRooms() {
    // only do this if room does not overlap
    mainRoom.fillMap();
 
-   let {width, height} = getDim();
+   game.rooms.push(mainRoom);
 
+   let maxRooms = 10;
 
-   const genCoord = (maxCells, dim) => {
-      // get limit on either side based on outer limit and a room dimension - width or height
-      let limit = OUTER_LIMIT + parseInt(dim/2);
-
-      // get range based on cells in array - limit on either side.
-      let range = maxCells - 2*limit;
-
-      // get a random  number within 
-      return limit + parseInt(Math.random()*range);
+   for (var i = 0; i < maxRooms; ++i) {
+      addRoom();
    }
 
-   let coords = {
-      x:genCoord(COLS, width),
-      y:genCoord(ROWS, height)
-   }
-   
-   let room = generateRoom(coords, width, height);
-
-   room.fillMap();
 
   // drawMap(0,0,COLS,ROWS);
 
