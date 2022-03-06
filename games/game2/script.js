@@ -165,6 +165,8 @@ const WEAPONS = [{
    }
 ];
 
+const OUTER_LIMIT = 3;
+
 const SHADOW_CODE = 0;
 const VISIBLE_CODE = 1;
 
@@ -328,9 +330,14 @@ function resetMap() {
    }
 
 }
+
+/**
+ * Randomly generates a set of dimensions.
+ * 
+ */ 
 function getDim () {
       const BASE_DIM = 10;
-      const EXTRA = 5;
+      const EXTRA = 15;
 
       let type = (Math.random() < 0.5) ? 'tall' : 'wide';
 
@@ -341,15 +348,21 @@ function getDim () {
       let additional = parseInt(Math.random()*EXTRA);
 
       if (type == 'tall') {
-         width += additional;
+         height += additional;
       }
       else {
-         height += additional
+         width += additional;
       }
-      console.log('width: ' + width);
-      console.log('height: ' + height);
       return {width, height};
 };
+
+/**
+ * 
+ * @param {Object} center
+ * @param {Number} height
+ * @param {Number} width
+ * 
+ */ 
 function setCoords (center, width, height) {
    console.log('setCoords');
 
@@ -367,13 +380,16 @@ function setCoords (center, width, height) {
    };
 
    return {start, end};
-
-
 }
-function generateRoom(center) {
+/**
+ * Generates one room based on a center point.
+ * @param {Object} center {x,y}
+ */ 
+function generateRoom(center, width, height) {
 
-   let {width, height} = getDim();
 
+
+   // get coordinates based on width and height
    let {start, end} = setCoords(center, width, height);
 
    let room = new Room(start, end);
@@ -384,6 +400,10 @@ function generateRoom(center) {
    return room;
 
 }
+/**
+ * Generates a series of map rooms
+ * 
+ */ 
 function generateMapRooms() {
    console.log('generate Map Rooms');
    resetMap();
@@ -393,9 +413,32 @@ function generateMapRooms() {
       y:ROWS/2
    };
 
-   let room = generateRoom(center);
+   let {width:c_width, height:c_height} = getDim();
+   let mainRoom = generateRoom(center, c_width, c_height);
 
-   console.log(room);
+   // only do this if room does not overlap
+   mainRoom.fillMap();
+
+   let {width, height} = getDim();
+
+
+   const genCoord = (maxCells, dim) => {
+      // get limit on either side based on outer limit and a room dimension - width or height
+      let limit = OUTER_LIMIT + parseInt(dim/2);
+
+      // get range based on cells in array - limit on either side.
+      let range = maxCells - 2*limit;
+
+      // get a random  number within 
+      return limit + parseInt(Math.random()*range);
+   }
+
+   let coords = {
+      x:genCoord(COLS, width),
+      y:genCoord(ROWS, height)
+   }
+   
+   let room = generateRoom(coords, width, height);
 
    room.fillMap();
 
@@ -424,8 +467,7 @@ function generateMapTunnels() {
    const ATTEMPTS = 30000;
    const MAX_PENALTIES_COUNT = 1000;
    const MINIMUM_TILES_AMOUNT = 1000;
-   const OUTER_LIMIT = 1;
-
+  
    const randomDirection = () => Math.random() <= 0.5 ? -1 : 1;
 
    let tiles = 0, penalties = 0;

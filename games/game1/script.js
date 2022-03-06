@@ -266,7 +266,7 @@ function generateMap() {
    const ATTEMPTS = 30000;
    const MAX_PENALTIES_COUNT = 1000;
    const MINIMUM_TILES_AMOUNT = 1000;
-   const OUTER_LIMIT = 1;
+   const OUTER_LIMIT = 3;
 
    const randomDirection = () => Math.random() <= 0.5 ? -1 : 1;
 
