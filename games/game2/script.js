@@ -75,6 +75,7 @@ class Enemy {
  */
 class Game {
    constructor() {
+      this.curRoomId = 0;
 
       this.map = [];
       this.shadow = [];
@@ -100,11 +101,14 @@ Game.prototype.reset = function() {
  * Rooms
  * 
  */ 
+
 class Room {
-   constructor(start, end, id) {
+   constructor(start, end) {
       this.start = start;
       this.end = end;
-      this.id = id;
+
+      this.id = null;
+
       this.doors = 0;
    }
 }
@@ -135,8 +139,8 @@ Room.prototype.fillMap = function() {
 
    for (var y = this.start.y; y <= this.end.y; ++y) {
       for (var x = this.start.x; x <= this.end.x; ++x) {
-
-         game.map[y][x] == FLOOR_CODE;
+ 
+         game.map[y][x] = FLOOR_CODE;
       }
    }
 }
@@ -293,27 +297,25 @@ init();
 
 function startGame() {
 
-   generateMap();
+   generateMapRooms();
 
    setTimeout(gameSetUp, 1000);
 
    function gameSetUp() {
       generatePlayer();
-      generateShadow();
-      generateItems(STARTING_WEAPONS_AMOUNT, WEAPON_CODE);
-      generateItems(STARTING_POTIONS_AMOUNT, POTION_CODE);
-      generateEnemies(TOTAL_ENEMIES);
+   //   generateShadow();
+     // generateItems(STARTING_WEAPONS_AMOUNT, WEAPON_CODE);
+     // generateItems(STARTING_POTIONS_AMOUNT, POTION_CODE);
+     // generateEnemies(TOTAL_ENEMIES);
       drawMap(0, 0, COLS, ROWS);
       updateStats();
    }
 }
 
-/**
- * The generate map function
- * 
- * This algorithmm starts in the center and works its way outward.
- */
-function generateMap() {
+
+function resetMap() {
+   console.log('resetMap');
+   game.map = [];
    // generate a solid wall.
    for (var row = 0; row < ROWS; row++) {
       // create row
@@ -324,8 +326,94 @@ function generateMap() {
          game.map[row].push(WALL_CODE);
       }
    }
+
+}
+function getDim () {
+      const BASE_DIM = 10;
+      const EXTRA = 5;
+
+      let type = (Math.random() < 0.5) ? 'tall' : 'wide';
+
+      let width, height;
+
+      width = height = BASE_DIM;
+
+      let additional = parseInt(Math.random()*EXTRA);
+
+      if (type == 'tall') {
+         width += additional;
+      }
+      else {
+         height += additional
+      }
+      console.log('width: ' + width);
+      console.log('height: ' + height);
+      return {width, height};
+};
+function setCoords (center, width, height) {
+   console.log('setCoords');
+
+   let halfW = parseInt(width/2);
+   let halfH = parseInt(height/2);
+
+   let start = {
+         x:center.x - halfW,
+         y:center.y - halfH
+   };
+
+   let end = {
+         x:center.x + halfW,
+         y:center.y + halfH
+   };
+
+   return {start, end};
+
+
+}
+function generateRoom(center) {
+
+   let {width, height} = getDim();
+
+   let {start, end} = setCoords(center, width, height);
+
+   let room = new Room(start, end);
+
+   room.id = game.curRoomId;
+   game.curRoomId++;
+
+   return room;
+
+}
+function generateMapRooms() {
+   console.log('generate Map Rooms');
+   resetMap();
+
+   let center = { 
+      x:COLS/2,
+      y:ROWS/2
+   };
+
+   let room = generateRoom(center);
+
+   console.log(room);
+
+   room.fillMap();
+
+  // drawMap(0,0,COLS,ROWS);
+
+   
+
+}
+/**
+ * The generate map function
+ * 
+ * This algorithmm starts in the center and works its way outward.
+ */
+function generateMapTunnels() {
+   
    // set up total number of tiles used
    // and the total number of penalties made
+   resetMap();
 
    
    let pos = { 
@@ -490,11 +578,14 @@ function generateValidCoords() {
 
    var x, y;
 
+   let turns = 0, limit = 100;
+
    do {
       x = Math.floor(Math.random() * COLS);
       y = Math.floor(Math.random() * ROWS);
+      turns++;
    }
-   while (game.map[y][x] != FLOOR_CODE);
+   while (game.map[y][x] != FLOOR_CODE && turns < limit);
  
    return {
       x: x,
@@ -529,7 +620,10 @@ function generateEnemies(amount) {
 }
 
 function generatePlayer() {
-   var coords = generateValidCoords();
+
+  // var coords = generateValidCoords();
+
+  var coords = {x:COLS/2, y:ROWS/2};
 
    // level, health, weapon, coords, xp
    player = new Player(1, 100, WEAPONS[0], coords, 30);
