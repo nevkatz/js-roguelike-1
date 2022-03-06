@@ -303,7 +303,7 @@ function startGame() {
 
    function gameSetUp() {
       generatePlayer();
-   //   generateShadow();
+      generateShadow();
      // generateItems(STARTING_WEAPONS_AMOUNT, WEAPON_CODE);
      // generateItems(STARTING_POTIONS_AMOUNT, POTION_CODE);
      // generateEnemies(TOTAL_ENEMIES);
