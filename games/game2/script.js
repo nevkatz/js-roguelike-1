@@ -210,8 +210,7 @@ Room.prototype.overlapsVert = function(room, wall=0) {
  * Used to eliminate rooms.
  * 
  */ 
-Room.prototype.overlaps = function(room) {
-   let wall = 1;
+Room.prototype.overlaps = function(room, wall=0) {
    return this.overlapsHoriz(room, wall) && this.overlapsVert(room, wall);
 }
 Room.prototype.inBounds = function() {
@@ -284,7 +283,78 @@ Room.prototype.connectRoom = function(room) {
 
    room.neighbors.push(this);
 
-   let region = {
+
+
+   if (this.overlapsHoriz(room) || this.overlapsVert(room)) {
+      this.connectDirect(room);
+   }
+   else {
+      this.connectWithCornerFromSides(room);
+   }
+}
+Room.prototype.connectWithCornerFromSides = function(room) {
+   // assumes branches go out from sides.
+   let corner = {x:room.center.x, y:this.center.y};
+   let horiz = null, vert = null;
+   
+      /**  
+       *  this   ----*
+       *             |
+       *             |
+       *            room
+       */
+      if (this.onLeft(room)) {
+           horiz = { 
+             start:{x:this.end.x, y:this.center.y},
+             end:corner,
+            };
+      };
+      /**
+       *  *--- this (onRight)
+       *  |
+       *  |
+       * room
+       */
+      if (this.onRight(room)) {
+         horiz = {
+            // start at corner
+            start:corner,
+            // and on left of this 
+            end:{x:this.start.x,y:this.center.y}
+         };
+      }
+      /**
+       *    this---*
+       *           |
+       *          room
+       * 
+       */ 
+      if (this.above(room)) {
+           vert = {
+             // start at corner, go down
+             start:corner,
+             // end at top center of other room
+             end:{x:room.center.x, y:room.start.y}
+           };
+      }
+      /*
+
+      room                    room
+                               |
+      |                        |
+      *----this        this----*
+       */
+      if (this.below(room)) {
+          vert = {
+            start:{x:room.center.x, y:room.end.y},
+            end:corner
+          };
+      }
+      addPath(vert);
+      addPath(horiz);
+}
+Room.prototype.connectDirect = function(room) {
+ let region = {
       start:{
          x:0,
          y:0
@@ -363,14 +433,6 @@ Room.prototype.connectRoom = function(room) {
 
            region.start.y = region.end.y = this.center.y;
         }
-      /*  else if (this.start.y == room.end.y) {
-         console.log('y -- this start = room end')
-           region.start.y = region.end.y = this.start.y;
-        }
-        else if (this.end.y = room.start.y) {
-           console.log('y -- this end = room start. ' + this.end.y);
-         region.start.y = region.end.y = this.end.y;
-        }*/
 
        else if (this.overlapsTop(room)) {
           region.start.y = room.start.y;
@@ -477,14 +539,14 @@ Room.prototype.nearestNeighbor = function() {
       let diffY = this.y - room.y;
       let dist = Math.sqrt(Math.pow(diffX, 2) + Math.pow(diffY, 2));
 
-      if ((this.overlapsHoriz(room) || this.overlapsVert(room))) {
+      //if ((this.overlapsHoriz(room) || this.overlapsVert(room))) {
 
          if (!shortest || dist < shortest) {
              shortest = dist;
              nearest = room;
          }
         
-      }
+      //}
    }
    return nearest;
 }
@@ -789,7 +851,7 @@ function addRoom(c) {
 
    for (var gameRoom of game.rooms) {
 
-      if (room.overlaps(gameRoom)) {
+      if (room.overlaps(gameRoom, 1)) {
          return false;
       }
 
@@ -817,7 +879,7 @@ function generateMapRooms() {
 
    addRoom(center);
 
-   let maxRooms = 30;
+   let maxRooms = 5;
 
 
    for (var i = 0; i < maxRooms; ++i) {
