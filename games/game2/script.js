@@ -22,7 +22,7 @@
  * Otherwise the map has to be redrawn every time you want to change the viewport
  * 
  *
- */ 
+ */
 
 /**
  * Classes 
@@ -101,11 +101,15 @@ Game.prototype.reset = function() {
 /**
  * Rooms
  * 
- */ 
+ */
 
 class Room {
-   constructor(start, end) {
+   constructor(center, start, end) {
+
+      this.center = center;
+      // upper left
       this.start = start;
+      // bottom right
       this.end = end;
 
       this.id = null;
@@ -116,35 +120,107 @@ class Room {
 
 Room.prototype.overlaps = function(room) {
    let wall = 2;
-  let test1 = this.end.x + wall > room.start.x &&
-                 this.start.x - wall < room.end.x &&
-                 this.end.y + wall > room.start.y &&
-                 this.start.y - wall  < room.end.y; 
+   let onLeft = this.end.x + wall > room.start.x &&
+      this.start.x - wall < room.end.x;
 
-  let test2  = room.end.x + wall > this.start.x &&
-               room.start.x - wall < this.end.x &&
-               room.end.y + wall > this.start.y &&
-               room.start.y - wall < this.end.y;
+    let onTop = this.end.y + wall > room.start.y &&
+      this.start.y - wall < room.end.y;
 
-   console.log('test1: ' + test1 + ' test2: ' + test2);
+   let onRight = this.start.x - wall < room.end.x &&
+        this.end.x + wall >  room.start.x;
 
-   return test1 || test2;
+   let onBot =  this.start.y < room.end.y + wall  &&
+     this.end.y > room.start.y - wall;
+
+   console.log('onLeft: ' + onLeft + ' onRight: ' + onRight);
+
+   console.log('onTop: ' + onTop + ' onBot: ' + onBot);
+
+   console.log('=======');
+   return (onLeft || onRight) && (onTop || onBot);
 }
 Room.prototype.inBounds = function() {
 
    return this.start.x > OUTER_LIMIT &&
-          this.end.x < COLS - OUTER_LIMIT &&
-          this.start.y > OUTER_LIMIT &&
-          this.end.y < ROWS - OUTER_LIMIT;
+      this.end.x < COLS - OUTER_LIMIT &&
+      this.start.y > OUTER_LIMIT &&
+      this.end.y < ROWS - OUTER_LIMIT;
 }
+
 Room.prototype.fillMap = function() {
 
    for (var y = this.start.y; y <= this.end.y; ++y) {
       for (var x = this.start.x; x <= this.end.x; ++x) {
- 
+
          game.map[y][x] = FLOOR_CODE;
       }
    }
+}
+
+
+Room.prototype.getDoors = function(room) {
+   let doors = {
+      top: {
+         x: this.center.x,
+         y: this.start.y,
+      },
+
+      bot: {
+         x: this.center.x,
+         y: this.end.y
+      },
+
+      left: {
+         x: this.start.x,
+         y: this.center.y
+      },
+
+      right: {
+         x: this.end.x,
+         y: this.center.y
+      }
+   };
+   return doors;
+}
+
+Room.prototype.shortestHall = function(room) {
+
+}
+Room.prototype.buildHall_test = function(room) {
+   /**
+    *  
+    * How to record which distance is the shortest distance between rooms?
+    */
+   let dist = {
+
+      // vert
+      top: Math.abs(this.start.y - room.end.y),
+      bot: Math.abs(this.end.y - room.start.y),
+
+      // horiz
+      left: Math.abs(this.start.x - room.end.x),
+      right: Math.abs(this.end.x - room.start.x)
+   };
+
+}
+Room.prototype.nearestNeighbor = function() {
+
+
+   let shortest = null,
+      nearest = null;
+
+   for (var room of game.rooms) {
+
+      let diffX = this.x - room.x;
+      let diffY = this.x - room.y;
+      let dist = Math.sqrt(Math.pow(diffX, 2) + Math.pow(diffY, 2));
+
+      if (!shortest || dist < shortest) {
+         shortest = dist;
+         nearest = room;
+      }
+   }
+   return nearest;
 }
 /**
  * Constants
@@ -205,18 +281,18 @@ const STARTING_POTIONS_AMOUNT = 4;
 const STARTING_WEAPONS_AMOUNT = 3;
 
 const TILE_COLORS = [
-        // wall
-      'grey',
-      // floor
-      'white',
-      // player
-      'blue',
-      // enemy
-      'red',
-      // health drop
-      'green',
-      // weapon
-      'orange'
+   // wall
+   'grey',
+   // floor
+   'white',
+   // player
+   'blue',
+   // enemy
+   'red',
+   // health drop
+   'green',
+   // weapon
+   'orange'
 ];
 
 // game object
@@ -308,9 +384,9 @@ function startGame() {
    function gameSetUp() {
       generatePlayer();
       generateShadow();
-     // generateItems(STARTING_WEAPONS_AMOUNT, WEAPON_CODE);
-     // generateItems(STARTING_POTIONS_AMOUNT, POTION_CODE);
-     // generateEnemies(TOTAL_ENEMIES);
+      // generateItems(STARTING_WEAPONS_AMOUNT, WEAPON_CODE);
+      // generateItems(STARTING_POTIONS_AMOUNT, POTION_CODE);
+      // generateEnemies(TOTAL_ENEMIES);
       drawMap(0, 0, COLS, ROWS);
       updateStats();
    }
@@ -336,26 +412,28 @@ function resetMap() {
 /**
  * Randomly generates a set of dimensions.
  * 
- */ 
-function getDim () {
-      const BASE_DIM = 10;
-      const EXTRA = 30;
+ */
+function getDim() {
+   const BASE_DIM = 5;
+   const EXTRA = 15;
 
-      let type = (Math.random() < 0.5) ? 'tall' : 'wide';
+   let type = (Math.random() < 0.5) ? 'tall' : 'wide';
 
-      let width, height;
+   let width, height;
 
-      width = height = BASE_DIM;
+   width = height = BASE_DIM;
 
-      let additional = parseInt(Math.random()*EXTRA);
+   let additional = parseInt(Math.random() * EXTRA);
 
-      if (type == 'tall') {
-         height += additional;
-      }
-      else {
-         width += additional;
-      }
-      return {width, height};
+   if (type == 'tall') {
+      height += additional;
+   } else {
+      width += additional;
+   }
+   return {
+      width,
+      height
+   };
 };
 
 /**
@@ -364,37 +442,43 @@ function getDim () {
  * @param {Number} height
  * @param {Number} width
  * 
- */ 
-function setCoords (center, width, height) {
+ */
+function setCoords(center, width, height) {
 
 
-   let halfW = parseInt(width/2);
-   let halfH = parseInt(height/2);
+   let halfW = parseInt(width / 2);
+   let halfH = parseInt(height / 2);
 
    let start = {
-         x:center.x - halfW,
-         y:center.y - halfH
+      x: center.x - halfW,
+      y: center.y - halfH
    };
 
    let end = {
-         x:center.x + halfW,
-         y:center.y + halfH
+      x: center.x + halfW,
+      y: center.y + halfH
    };
 
-   return {start, end};
+   return {
+      start,
+      end
+   };
 }
 /**
  * Generates one room based on a center point.
  * @param {Object} center {x,y}
- */ 
+ */
 function generateRoom(center, width, height) {
 
 
 
    // get coordinates based on width and height
-   let {start, end} = setCoords(center, width, height);
+   let {
+      start,
+      end
+   } = setCoords(center, width, height);
 
-   let room = new Room(start, end);
+   let room = new Room(center, start, end);
 
    room.id = game.curRoomId;
    game.curRoomId++;
@@ -402,31 +486,35 @@ function generateRoom(center, width, height) {
    return room;
 
 }
-function addRoom() {
+
+function addRoom(c) {
    const genCoord = (maxCells, dim) => {
       // get limit on either side based on outer limit and a room dimension - width or height
-      let limit = OUTER_LIMIT + parseInt(dim/2);
+      let limit = OUTER_LIMIT + parseInt(dim / 2);
 
       // get range based on cells in array - limit on either side.
-      let range = maxCells - 2*limit;
+      let range = maxCells - 2 * limit;
 
       // get a random  number within 
-      return limit + parseInt(Math.random()*range);
+      return limit + parseInt(Math.random() * range);
    }
-   let {width, height} = getDim();
+   let {
+      width,
+      height
+   } = getDim();
 
-   let coords = {
-      x:genCoord(COLS, width),
-      y:genCoord(ROWS, height)
+   let coords = c || {
+      x: genCoord(COLS, width),
+      y: genCoord(ROWS, height)
    }
-   
+
    let room = generateRoom(coords, width, height);
 
 
    for (var gameRoom of game.rooms) {
 
       if (room.overlaps(gameRoom)) {
-         console.log('room '+room.id+' overlaps...');
+         console.log('room ' + room.id + ' overlaps...');
          return false;
       }
 
@@ -441,34 +529,26 @@ function addRoom() {
 /**
  * Generates a series of map rooms
  * 
- */ 
+ */
 function generateMapRooms() {
 
    resetMap();
 
-   let center = { 
-      x:COLS/2,
-      y:ROWS/2
+   let center = {
+      x: COLS / 2,
+      y: ROWS / 2
    };
 
-   let {width:c_width, height:c_height} = getDim();
-   let mainRoom = generateRoom(center, c_width, c_height);
+   addRoom(center);
 
-   // only do this if room does not overlap
-   mainRoom.fillMap();
-
-   game.rooms.push(mainRoom);
-
-   let maxRooms = 10;
+   let maxRooms = 100;
 
    for (var i = 0; i < maxRooms; ++i) {
       addRoom();
    }
 
 
-  // drawMap(0,0,COLS,ROWS);
 
-   
 
 }
 /**
@@ -477,24 +557,25 @@ function generateMapRooms() {
  * This algorithmm starts in the center and works its way outward.
  */
 function generateMapTunnels() {
-   
+
    // set up total number of tiles used
    // and the total number of penalties made
    resetMap();
 
-   
-   let pos = { 
-      x:COLS/2,
-      y:ROWS/2
+
+   let pos = {
+      x: COLS / 2,
+      y: ROWS / 2
    };
 
    const ATTEMPTS = 30000;
    const MAX_PENALTIES_COUNT = 1000;
    const MINIMUM_TILES_AMOUNT = 1000;
-  
+
    const randomDirection = () => Math.random() <= 0.5 ? -1 : 1;
 
-   let tiles = 0, penalties = 0;
+   let tiles = 0,
+      penalties = 0;
 
    for (var i = 0; i < ATTEMPTS; i++) {
 
@@ -512,23 +593,26 @@ function generateMapTunnels() {
       // we don't want to dig here so let's find a way to get out
       while (pos[axis] < OUTER_LIMIT || pos[axis] >= numCells - OUTER_LIMIT) {
 
-            pos[axis] += randomDirection();
+         pos[axis] += randomDirection();
 
-            penalties++;
+         penalties++;
 
-            if (penalties > MAX_PENALTIES_COUNT) {
+         if (penalties > MAX_PENALTIES_COUNT) {
 
-               // if we have used up our tiles, we're done.
-               if (tiles >= MINIMUM_TILES_AMOUNT) {
-                  return;
-               }
-                  // bring coords back to center
-               pos.x = COLS / 2;
-               pos.y = ROWS / 2;
+            // if we have used up our tiles, we're done.
+            if (tiles >= MINIMUM_TILES_AMOUNT) {
+               return;
             }
-      } 
+            // bring coords back to center
+            pos.x = COLS / 2;
+            pos.y = ROWS / 2;
+         }
+      }
 
-      let {x, y} = pos;
+      let {
+         x,
+         y
+      } = pos;
 
       // if not a floor, make this a floor
       if (game.map[y][x] != FLOOR_CODE) {
@@ -546,7 +630,7 @@ function generateMapTunnels() {
  * @param {Number} quantity - the number of items to generate
  * @param {Number} tileCode - corresponds to a constant, such as POTION_CODE.
  *                            used to index into the TILE_COLORS array
- */ 
+ */
 function generateItems(quantity, tileCode) {
    for (var i = 0; i < quantity; i++) {
 
@@ -554,8 +638,8 @@ function generateItems(quantity, tileCode) {
 
       addObjToMap(coords, tileCode);
 
-      if (!game.isShadowToggled || 
-           game.shadow[coords.y][coords.x] == VISIBLE_CODE) {
+      if (!game.isShadowToggled ||
+         game.shadow[coords.y][coords.x] == VISIBLE_CODE) {
 
          let color = TILE_COLORS[tileCode];
          drawObject(coords.x, coords.y, color);
@@ -591,7 +675,10 @@ function updateStats() {
 
    for (var prop of weapon_props) {
 
-      let {domId,key} = prop;
+      let {
+         domId,
+         key
+      } = prop;
 
       let el = document.getElementById(domId);
 
@@ -638,13 +725,14 @@ function drawMap(startX, startY, endX, endY) {
 
 /**
  * Coordinate Helper Functions
- */ 
+ */
 
 function generateValidCoords() {
 
    var x, y;
 
-   let turns = 0, limit = 100;
+   let turns = 0,
+      limit = 100;
 
    do {
       x = Math.floor(Math.random() * COLS);
@@ -652,13 +740,14 @@ function generateValidCoords() {
       turns++;
    }
    while (game.map[y][x] != FLOOR_CODE && turns < limit);
- 
+
    return {
       x: x,
       y: y
    };
 
 }
+
 function pickRandom(arr) {
    let idx = Math.floor(Math.random() * arr.length);
 
@@ -687,9 +776,12 @@ function generateEnemies(amount) {
 
 function generatePlayer() {
 
-  // var coords = generateValidCoords();
+   // var coords = generateValidCoords();
 
-  var coords = {x:COLS/2, y:ROWS/2};
+   var coords = {
+      x: COLS / 2,
+      y: ROWS / 2
+   };
 
    // level, health, weapon, coords, xp
    player = new Player(1, 100, WEAPONS[0], coords, 30);
@@ -708,10 +800,10 @@ function addObjToMap(coords, tileCode) {
  * @param {Number} x
  * @param {Number} y
  * @param {String} color
- */ 
+ */
 function drawObject(x, y, color) {
 
- //  game.context.clearRect(x * 10, y * 10, 10, 10);
+   //  game.context.clearRect(x * 10, y * 10, 10, 10);
    game.context.beginPath();
    game.context.rect(x * TILE_DIM, y * TILE_DIM, TILE_DIM, TILE_DIM);
    game.context.fillStyle = color;
@@ -757,8 +849,7 @@ function addKeyboardListener() {
          let enemy = game.enemies.find(matching_coords);
 
          fightEnemy(enemy);
-      } 
-      else if (game.map[y][x] != WALL_CODE) {
+      } else if (game.map[y][x] != WALL_CODE) {
          // if next spot is potion
          if (game.map[y][x] == POTION_CODE) {
 
@@ -766,7 +857,7 @@ function addKeyboardListener() {
 
             removeObjFromMap(x, y);
             generateItems(1, POTION_CODE);
-         // if next spot is weapon
+            // if next spot is weapon
          } else if (game.map[y][x] == WEAPON_CODE) {
 
             player.weapon = pickRandom(WEAPONS);
@@ -783,7 +874,7 @@ function addKeyboardListener() {
          let top = oldY - VISIBILITY - 1;
 
          let right = x + VISIBILITY + 2;
-         let bot = y + VISIBILITY + 2 ;
+         let bot = y + VISIBILITY + 2;
 
          drawMap(left, top, right, bot);
       }
@@ -798,8 +889,7 @@ function fightEnemy(enemy) {
    }
    if (enemy.health - player.weapon.damage <= 0) {
       enemyDefeated(enemy);
-   }
-   else {
+   } else {
       enemy.health -= player.weapon.damage;
    }
    player.health -= enemy.damage;
@@ -819,7 +909,7 @@ function enemyDefeated(enemy) {
    drawMap(left, top, right, bot);
 
    // add experience points
-   player.xp += parseInt((enemy.damage + enemy.health)/2);
+   player.xp += parseInt((enemy.damage + enemy.health) / 2);
 
    // calculate the level in points. Level 1 has no experience so machine-wise it is level 0.
    let level_in_points = POINTS_PER_LEVEL * (player.level - 1)
@@ -872,7 +962,8 @@ function removeObjFromMap(x, y) {
 function generateShadow() {
 
 
-   let start = {}, end = {};
+   let start = {},
+      end = {};
 
    let left_edge = player.coords.x - VISIBILITY;
    let top_edge = player.coords.y - VISIBILITY;
@@ -883,7 +974,7 @@ function generateShadow() {
    let right_edge = player.coords.x + VISIBILITY;
    let bot_edge = player.coords.y + VISIBILITY;
 
-   end.x = right_edge  >= COLS ? COLS - 1 : right_edge;
+   end.x = right_edge >= COLS ? COLS - 1 : right_edge;
    end.y = bot_edge >= ROWS ? ROWS - 1 : bot_edge;
 
    // iterate through all squares on the map
@@ -921,10 +1012,11 @@ function updatePlayerPosition(oldX, oldY, newX, newY) {
       y: newY
    };
 
-   let start = {}, end = {};
+   let start = {},
+      end = {};
 
    // if player is going right and down
-   let old_left = oldX - VISIBILITY;  
+   let old_left = oldX - VISIBILITY;
    let old_top = oldY - VISIBILITY;
 
    start.x = old_left < 0 ? 0 : old_left;
