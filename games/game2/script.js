@@ -328,9 +328,9 @@ Room.prototype.connectRoom = function(room) {
          // our room is below so make this the end point
          path.end.y = this.start.y - 1;
        }
-       console.log('adding vert path from ' + this.id + ' to ' + room.id);
-       console.log(`start: (${path.start.x},${path.start.y})`);
-       console.log(`end: (${path.end.x},${path.end.y})`);
+       //console.log('adding vert path from ' + this.id + ' to ' + room.id);
+       //console.log(`start: (${path.start.x},${path.start.y})`);
+      // console.log(`end: (${path.end.x},${path.end.y})`);
        addPath(path, this.id);
    }
    else if (this.overlapsVert(room)) {
@@ -358,6 +358,7 @@ Room.prototype.connectRoom = function(room) {
        }
 
        console.log('adding horiz path from ' + this.id + ' to ' + room.id);
+       console.log('region y start: ' + region.start.y + ' end: ' + region.end.y);
        path.start.y = path.end.y = parseInt((region.start.y + region.end.y)/2);
        addPath(path, this.id);
    }
@@ -406,9 +407,9 @@ Room.prototype.nearestNeighbor = function() {
    let rooms = game.rooms.filter(x => x.id != this.id);
 
 
-   console.log(this.id +' neighbors: '+ this.neighbors.map(x => x.id));
+  // console.log(this.id +' neighbors: '+ this.neighbors.map(x => x.id));
 
-   console.log('id: '+this.id+' rooms before filter: ' + rooms.length);
+  // console.log('id: '+this.id+' rooms before filter: ' + rooms.length);
    let obj = this;
    
    if (obj.neighbors.length > 0) {
@@ -416,15 +417,15 @@ Room.prototype.nearestNeighbor = function() {
       
           let isNeighbor = obj.neighbors.find(neighbor => neighbor.id == x.id);
 
-          console.log(x.id + ' not a Neighbor: ' + !isNeighbor);
+        //  console.log(x.id + ' not a Neighbor: ' + !isNeighbor);
           return !isNeighbor;
          });
    }
    else {
       console.log(this.id + ' has no neighbors at this time...');
    }
-   console.log('id: '+this.id+' rooms after filter: ' + rooms.length);
-   console.log('===');
+ //  console.log('id: '+this.id+' rooms after filter: ' + rooms.length);
+ //  console.log('===');
 
    for (var room of rooms) {
 
