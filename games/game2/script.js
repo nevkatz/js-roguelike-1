@@ -115,29 +115,104 @@ class Room {
       this.id = null;
 
       this.doors = 0;
+
+      this.wall = 2;
+
+      this.neighbors = [];
+
+
    }
 }
+Room.prototype.overlapsLeft = function(room, wall=0) {
+          // the end is to the right of the other room's start
+   return this.end.x + wall >= room.start.x &&
+          // the start is to the left of hte other room's end
+          this.start.x - wall <= room.end.x;
 
+ /**
+  * 
+  * Here the region of overlap is between other.start.x and this.end.x
+  * 
+  * this.start.x
+  *   |
+  *   *--------* <- this.end.x
+  *   |  this  |
+  *   *--------*
+  *        *--------* <- room.end.x
+  *        |  other |
+  *        *--------*
+  *        |
+  *   room.start.x
+  */
+}
+Room.prototype.overlapsRight = function(room, wall=0) {
+   return  this.start.x - wall <= room.end.x &&
+           this.end.x + wall >=  room.start.x;
+
+ /**
+  * 
+  *          this.start.x
+  *             |
+  *             *--------* <- this.end.x
+  *             |  this  |
+  *             *--------*
+  *       *--------* <- room.end.x
+  *       |  other |
+  *       *--------*
+  *        |
+  *  room.start.x
+  */
+
+}
+Room.prototype.overlapsTop = function(room, wall=0) {
+   return this.end.y + wall >= room.start.y &&
+          this.start.y - wall <= room.end.y;
+
+ /**
+  *    *--------* <-- this.start.y
+  *    |        | 
+  *    |  this  |
+  *    |        |    *---------* <- room.start.y
+  *    |        |    |         |
+  *    *--------*    |  other  |
+  *                  |  room   |
+  *    |             |         |  
+  *  this.end.y      *---------* <- room.end.y
+  */                 
+
+}
+Room.prototype.overlapsBot = function(room, wall=0) {
+
+   return this.start.y <= room.end.y + wall  &&
+          this.end.y >= room.start.y - wall;
+
+ /**
+  *    *--------* <-- room.start.y
+  *    |        | 
+  *    |  other |
+  *    |  room  |    *---------* <- this.start.y
+  *    |        |    |         |
+  *    *--------*    |   this  |
+  *    |             |         |  
+  *  room.end.y      *---------* <- this.end.y
+  */                 
+
+}
+// we need both a vertical or horizontal overlap.
+
+Room.prototype.overlapsHoriz = function(room, wall=0) {
+   return this.overlapsRight(room, wall) || this.overlapsLeft(room, wall);
+}
+Room.prototype.overlapsVert = function(room, wall=0) {
+   return this.overlapsTop(room, wall) || this.overlapsBot(room, wall);
+}
+/**
+ * Used to eliminate rooms.
+ * 
+ */ 
 Room.prototype.overlaps = function(room) {
-   let wall = 2;
-   let onLeft = this.end.x + wall > room.start.x &&
-      this.start.x - wall < room.end.x;
-
-    let onTop = this.end.y + wall > room.start.y &&
-      this.start.y - wall < room.end.y;
-
-   let onRight = this.start.x - wall < room.end.x &&
-        this.end.x + wall >  room.start.x;
-
-   let onBot =  this.start.y < room.end.y + wall  &&
-     this.end.y > room.start.y - wall;
-
-   console.log('onLeft: ' + onLeft + ' onRight: ' + onRight);
-
-   console.log('onTop: ' + onTop + ' onBot: ' + onBot);
-
-   console.log('=======');
-   return (onLeft || onRight) && (onTop || onBot);
+   let wall = 1;
+   return this.overlapsHoriz(room, wall) && this.overlapsVert(room, wall);
 }
 Room.prototype.inBounds = function() {
 
@@ -183,9 +258,128 @@ Room.prototype.getDoors = function(room) {
    return doors;
 }
 
-Room.prototype.shortestHall = function(room) {
+Room.prototype.below = function(room) {
+   return this.start.y > room.end.y;
+};
 
+Room.prototype.above = function(room) {
+   return this.end.y < room.start.y;
+};
+
+Room.prototype.onLeft = function(room) {
+   return this.end.x < room.start.x;
 }
+
+Room.prototype.onRight = function(room) {
+   return this.start.x > room.end.x;
+}
+
+
+Room.prototype.connectRoom = function(room) {
+
+   this.neighbors.push(room);
+
+   room.neighbors.push(this);
+
+   let region = {
+      start:{
+         x:0,
+         y:0
+      },
+      end:{
+         x:0,
+         y:0
+      }
+   };
+
+   let path = {
+      start:{
+         x:0,
+         y:0
+      },
+      end:{
+         x:0,
+         y:0
+      }
+   };
+
+   if (this.overlapsHoriz(room)) {
+
+        if(this.overlapsLeft(room)) {
+          region.start.x = room.start.x;
+          region.end.x = this.end.x;
+        }
+        else if (this.overlapsRight(room)) {
+          region.start.x = this.start.x;
+          region.end.x = room.end.x;
+        }
+        else {
+         console.log('should have horiz overlap but none for ' + this.id);
+        }
+        path.start.x = path.end.x = parseInt((region.start.x + region.end.x)/2);
+
+       if (this.above(room)) {
+         path.start.y = this.end.y + 1;
+         path.end.y = room.start.y - 1;
+       }
+       else {
+ 
+         path.start.y = room.end.y + 1;
+         // our room is below so make this the end point
+         path.end.y = this.start.y - 1;
+       }
+       console.log('adding vert path from ' + this.id + ' to ' + room.id);
+       console.log(`start: (${path.start.x},${path.start.y})`);
+       console.log(`end: (${path.end.x},${path.end.y})`);
+       addPath(path, this.id);
+   }
+   else if (this.overlapsVert(room)) {
+
+       if (this.overlapsTop(room)) {
+          region.start.y = room.start.y;
+          region.end.y = this.end.y;
+       }
+       else if (this.overlapsBot(room)) {
+         region.start.y = this.start.y;
+         region.end.y = room.end.y;
+       }
+       else {
+         console.log('should have vert overlap but none for ' + this.id);
+       }
+       if (this.onLeft(room)) {
+         path.start.x = this.end.x + 1;
+         path.end.x = room.start.x - 1;
+       }
+       else {
+ 
+         path.start.x = room.end.x + 1;
+         // room is on the right
+         path.end.x = this.start.x - 1;
+       }
+
+       console.log('adding horiz path from ' + this.id + ' to ' + room.id);
+       path.start.y = path.end.y = parseInt((region.start.y + region.end.y)/2);
+       addPath(path, this.id);
+   }
+   else {
+      console.log('no overlap for ' + this.id);
+   }
+
+   
+ 
+}
+function addPath(path, id) {
+
+   for (var y = path.start.y; y <= path.end.y; ++y) {
+      for (var x = path.start.x; x <= path.end.x; ++x) {
+         game.map[y][x] = FLOOR_CODE;
+      }
+   }
+}
+
+
+
+
 Room.prototype.buildHall_test = function(room) {
    /**
     *  
@@ -209,15 +403,42 @@ Room.prototype.nearestNeighbor = function() {
    let shortest = null,
       nearest = null;
 
-   for (var room of game.rooms) {
+   let rooms = game.rooms.filter(x => x.id != this.id);
+
+
+   console.log(this.id +' neighbors: '+ this.neighbors.map(x => x.id));
+
+   console.log('id: '+this.id+' rooms before filter: ' + rooms.length);
+   let obj = this;
+   
+   if (obj.neighbors.length > 0) {
+        rooms = rooms.filter(x => {
+      
+          let isNeighbor = obj.neighbors.find(neighbor => neighbor.id == x.id);
+
+          console.log(x.id + ' not a Neighbor: ' + !isNeighbor);
+          return !isNeighbor;
+         });
+   }
+   else {
+      console.log(this.id + ' has no neighbors at this time...');
+   }
+   console.log('id: '+this.id+' rooms after filter: ' + rooms.length);
+   console.log('===');
+
+   for (var room of rooms) {
 
       let diffX = this.x - room.x;
-      let diffY = this.x - room.y;
+      let diffY = this.y - room.y;
       let dist = Math.sqrt(Math.pow(diffX, 2) + Math.pow(diffY, 2));
 
-      if (!shortest || dist < shortest) {
-         shortest = dist;
-         nearest = room;
+      if ((this.overlapsHoriz(room) || this.overlapsVert(room))) {
+
+         if (!shortest || dist < shortest) {
+             shortest = dist;
+             nearest = room;
+         }
+        
       }
    }
    return nearest;
@@ -384,9 +605,9 @@ function startGame() {
    function gameSetUp() {
       generatePlayer();
       generateShadow();
-      // generateItems(STARTING_WEAPONS_AMOUNT, WEAPON_CODE);
-      // generateItems(STARTING_POTIONS_AMOUNT, POTION_CODE);
-      // generateEnemies(TOTAL_ENEMIES);
+       generateItems(STARTING_WEAPONS_AMOUNT, WEAPON_CODE);
+       generateItems(STARTING_POTIONS_AMOUNT, POTION_CODE);
+       generateEnemies(TOTAL_ENEMIES);
       drawMap(0, 0, COLS, ROWS);
       updateStats();
    }
@@ -414,8 +635,8 @@ function resetMap() {
  * 
  */
 function getDim() {
-   const BASE_DIM = 5;
-   const EXTRA = 15;
+   const BASE_DIM = 6;
+   const EXTRA = 5;
 
    let type = (Math.random() < 0.5) ? 'tall' : 'wide';
 
@@ -514,13 +735,11 @@ function addRoom(c) {
    for (var gameRoom of game.rooms) {
 
       if (room.overlaps(gameRoom)) {
-         console.log('room ' + room.id + ' overlaps...');
          return false;
       }
 
    }
 
-   console.log('adding ' + room.id);
    room.fillMap();
    game.rooms.push(room);
    return true;
@@ -541,15 +760,24 @@ function generateMapRooms() {
 
    addRoom(center);
 
-   let maxRooms = 100;
+   let maxRooms = 25;
 
    for (var i = 0; i < maxRooms; ++i) {
       addRoom();
    }
 
+   for (var room of game.rooms) {
 
+      let neighbor = room.nearestNeighbor();
 
+      if (neighbor) {
+         room.connectRoom(neighbor);
+      }
+      else {
+         console.log('no matching room for ' + room.id);
+      }
 
+   }
 }
 /**
  * The generate map function
