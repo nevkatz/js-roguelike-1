@@ -257,6 +257,9 @@ Room.prototype.getDoors = function(room) {
    };
    return doors;
 }
+Room.prototype.contains = function(x, prop) {
+   return x >= this.start[prop] && x <= this.end[prop];
+}
 
 Room.prototype.below = function(room) {
    return this.start.y > room.end.y;
@@ -323,7 +326,16 @@ Room.prototype.connectRoom = function(room) {
         else {
          console.log('should have horiz overlap but none for ' + this.id);
         }
-        path.start.x = path.end.x = parseInt((region.start.x + region.end.x)/2);
+
+
+        //path.start.x = path.end.x = Math.round((region.start.x + region.end.x)/2);
+
+         for (var x = region.start.x; x <= region.end.x; ++x) {
+           if (room.contains(x, 'x') && this.contains(x, 'x')) {
+            path.start.x = path.end.x = x;
+           }
+         }
+
         console.log('** path start x: ' + path.start.x);
 
        if (this.above(room)) {
@@ -351,14 +363,14 @@ Room.prototype.connectRoom = function(room) {
 
            region.start.y = region.end.y = this.center.y;
         }
-        else if (this.start.y == room.end.y) {
+      /*  else if (this.start.y == room.end.y) {
          console.log('y -- this start = room end')
            region.start.y = region.end.y = this.start.y;
         }
         else if (this.end.y = room.start.y) {
-           console.log('y -- this end = room start')
+           console.log('y -- this end = room start. ' + this.end.y);
          region.start.y = region.end.y = this.end.y;
-        }
+        }*/
 
        else if (this.overlapsTop(room)) {
           region.start.y = room.start.y;
@@ -384,8 +396,14 @@ Room.prototype.connectRoom = function(room) {
 
        console.log('adding horiz path from ' + this.id + ' to ' + room.id);
        console.log('region y start: ' + region.start.y + ' end: ' + region.end.y);
-       path.start.y = path.end.y = parseInt((region.start.y + region.end.y)/2);
+      // path.start.y = path.end.y = Math.round((region.start.y + region.end.y)/2);
        console.log('path start y: ' + path.start.y);
+
+       for (var y = region.start.y; y <= region.end.y; ++y) {
+         if (room.contains(y, 'y') && this.contains(y, 'y')) {
+            path.start.y = path.end.y = y;
+         }
+       }
        addPath(path, this.id);
    }
    else {
@@ -632,15 +650,25 @@ function startGame() {
    function gameSetUp() {
       generatePlayer();
       generateShadow();
-       generateItems(STARTING_WEAPONS_AMOUNT, WEAPON_CODE);
-       generateItems(STARTING_POTIONS_AMOUNT, POTION_CODE);
-       generateEnemies(TOTAL_ENEMIES);
+     //  generateItems(STARTING_WEAPONS_AMOUNT, WEAPON_CODE);
+     //  generateItems(STARTING_POTIONS_AMOUNT, POTION_CODE);
+     //  generateEnemies(TOTAL_ENEMIES);
       drawMap(0, 0, COLS, ROWS);
       updateStats();
+      labelRooms();
+   }
+
+}
+function labelRooms() {
+   game.context.fillStyle ='black';
+   game.context.font = '20px Arial';
+   for (var room of game.rooms) {
+      console.log('labelling rooms');
+
+      game.context.fillText("r" + room.id, room.center.x*TILE_DIM, room.center.y*TILE_DIM);
    }
 }
-
-
+   
 function resetMap() {
 
    game.map = [];
@@ -767,7 +795,9 @@ function addRoom(c) {
 
    }
 
+
    room.fillMap();
+
    game.rooms.push(room);
    return true;
 
@@ -787,7 +817,8 @@ function generateMapRooms() {
 
    addRoom(center);
 
-   let maxRooms = 25;
+   let maxRooms = 30;
+
 
    for (var i = 0; i < maxRooms; ++i) {
       addRoom();
