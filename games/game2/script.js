@@ -302,10 +302,17 @@ Room.prototype.connectRoom = function(room) {
          y:0
       }
    };
-
+   let limit = 2;
    if (this.overlapsHoriz(room)) {
 
-        if(this.overlapsLeft(room)) {
+        if (Math.abs(this.start.x = room.start.x) < limit ||
+            Math.abs(this.end.x - room.end.x) < limit) {
+         console.log(this.id + ' and ' + room.id + ' are horiz aligned');
+
+           region.start.x = region.end.x = this.center.x;
+        }
+
+        else if(this.overlapsLeft(room)) {
           region.start.x = room.start.x;
           region.end.x = this.end.x;
         }
@@ -317,6 +324,7 @@ Room.prototype.connectRoom = function(room) {
          console.log('should have horiz overlap but none for ' + this.id);
         }
         path.start.x = path.end.x = parseInt((region.start.x + region.end.x)/2);
+        console.log('** path start x: ' + path.start.x);
 
        if (this.above(room)) {
          path.start.y = this.end.y + 1;
@@ -328,14 +336,31 @@ Room.prototype.connectRoom = function(room) {
          // our room is below so make this the end point
          path.end.y = this.start.y - 1;
        }
-       //console.log('adding vert path from ' + this.id + ' to ' + room.id);
-       //console.log(`start: (${path.start.x},${path.start.y})`);
-      // console.log(`end: (${path.end.x},${path.end.y})`);
+       console.log('adding vert path from ' + this.id + ' to ' + room.id);
+       console.log(`start: (${path.start.x},${path.start.y})`);
+       console.log(`end: (${path.end.x},${path.end.y})`);
+
        addPath(path, this.id);
    }
    else if (this.overlapsVert(room)) {
 
-       if (this.overlapsTop(room)) {
+       if (Math.abs(this.start.y - room.start.y) < limit ||
+            Math.abs(this.end.y - room.end.y) < limit) {
+
+           console.log(this.id + ' and ' + room.id + ' are vert aligned');
+
+           region.start.y = region.end.y = this.center.y;
+        }
+        else if (this.start.y == room.end.y) {
+         console.log('y -- this start = room end')
+           region.start.y = region.end.y = this.start.y;
+        }
+        else if (this.end.y = room.start.y) {
+           console.log('y -- this end = room start')
+         region.start.y = region.end.y = this.end.y;
+        }
+
+       else if (this.overlapsTop(room)) {
           region.start.y = room.start.y;
           region.end.y = this.end.y;
        }
@@ -360,6 +385,7 @@ Room.prototype.connectRoom = function(room) {
        console.log('adding horiz path from ' + this.id + ' to ' + room.id);
        console.log('region y start: ' + region.start.y + ' end: ' + region.end.y);
        path.start.y = path.end.y = parseInt((region.start.y + region.end.y)/2);
+       console.log('path start y: ' + path.start.y);
        addPath(path, this.id);
    }
    else {
