@@ -339,14 +339,14 @@ Room.prototype.connectRoom = function(room) {
         console.log('** path start x: ' + path.start.x);
 
        if (this.above(room)) {
-         path.start.y = this.end.y + 1;
-         path.end.y = room.start.y - 1;
+         path.start.y = this.end.y;
+         path.end.y = room.start.y;
        }
        else {
  
-         path.start.y = room.end.y + 1;
+         path.start.y = room.end.y;
          // our room is below so make this the end point
-         path.end.y = this.start.y - 1;
+         path.end.y = this.start.y;
        }
        console.log('adding vert path from ' + this.id + ' to ' + room.id);
        console.log(`start: (${path.start.x},${path.start.y})`);
@@ -384,8 +384,8 @@ Room.prototype.connectRoom = function(room) {
          console.log('should have vert overlap but none for ' + this.id);
        }
        if (this.onLeft(room)) {
-         path.start.x = this.end.x + 1;
-         path.end.x = room.start.x - 1;
+         path.start.x = this.end.x;
+         path.end.x = room.start.x;
        }
        else {
  
