@@ -370,7 +370,7 @@ Room.prototype.connectRoom = function(room) {
 
    room.neighbors.push(this);
 
-   const tolerance = 0;
+   const tolerance = -2;
 
    if (this.overlapsHoriz(room, tolerance) || this.overlapsVert(room,tolerance)) {
       console.log(`room${this.id} direct connecting with ${room.id}`);
@@ -585,14 +585,14 @@ Room.prototype.connectDirect = function(room, tolerance) {
 
         //path.start.x = path.end.x = Math.round((doorLine.start.x + doorLine.end.x)/2);
         if (this.above(room)) {
-         path.start.y = this.end.y;
-         path.end.y = room.start.y;
+         path.start.y = this.end.y - 1;
+         path.end.y = room.start.y + 1;
        }
        else {
  
-         path.start.y = room.end.y;
+         path.start.y = room.end.y -1;
          // our room is below so make this the end point
-         path.end.y = this.start.y;
+         path.end.y = this.start.y + 1;
        }
 
          for (var x = doorLine.start.x; x <= doorLine.end.x; ++x) {
@@ -641,14 +641,14 @@ Room.prototype.connectDirect = function(room, tolerance) {
          console.log('should have vert overlap but none for ' + this.id);
        }
        if (this.onLeft(room)) {
-         path.start.x = this.end.x;
-         path.end.x = room.start.x;
+         path.start.x = this.end.x - 1;
+         path.end.x = room.start.x + 1;
        }
        else {
  
-         path.start.x = room.end.x;
+         path.start.x = room.end.x - 1;
          // room is on the right
-         path.end.x = this.start.x;
+         path.end.x = this.start.x + 1;
        }
 
        console.log('adding horiz path from ' + this.id + ' to ' + room.id);
@@ -772,7 +772,7 @@ Room.prototype.nearestNeighbor = function() {
       let diffX = this.x - room.x;
       let diffY = this.y - room.y;
       let dist = Math.sqrt(Math.pow(diffX, 2) + Math.pow(diffY, 2));
-         if ((!shortest || dist < shortest || this.isAdjacent(room))) {
+         if (!room.roomBetween(room) && (!shortest || dist < shortest || this.isAdjacent(room))) {
 
              shortest = dist;
              nearest = room;
