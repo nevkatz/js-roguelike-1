@@ -317,12 +317,12 @@ function startGame() {
    function gameSetUp() {
       generatePlayer();
       generateShadow();
-       generateItems(STARTING_WEAPONS_AMOUNT, WEAPON_CODE);
-       generateItems(STARTING_POTIONS_AMOUNT, POTION_CODE);
-       generateEnemies(TOTAL_ENEMIES);
+      // generateItems(STARTING_WEAPONS_AMOUNT, WEAPON_CODE);
+      // generateItems(STARTING_POTIONS_AMOUNT, POTION_CODE);
+      // generateEnemies(TOTAL_ENEMIES);
       drawMap(0, 0, COLS, ROWS);
       updateStats();
-      labelRooms();
+    //  labelRooms();
    }
 
 }
@@ -485,7 +485,7 @@ function generateMapRooms() {
 
    addRoom(center);
 
-   let maxRooms = 10;
+   let maxRooms = 3;
 
 
    for (var i = 0; i < maxRooms; ++i) {
@@ -498,7 +498,7 @@ function generateMapRooms() {
     for (var room of game.rooms) {
 
 
-     // let success = room.findFacingRooms();
+      let success = room.findFacingRooms();
 
       let neighbor = room.nearestNeighbor();
  
@@ -523,7 +523,7 @@ function generateMapRooms() {
     }*/
    }
    for (var room of game.rooms) {
-      room.connectRemaining();
+     room.connectRemaining();
    }
    printNeighbors();
 }

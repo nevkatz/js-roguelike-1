@@ -51,7 +51,8 @@ Room.prototype.isAdjacent = function(room) {
 
    return this.adjacentVert(room, limit) || this.adjacentHoriz(room, limit);
 }
-Room.prototype.findFacingRooms = function(maxRooms=1) {
+Room.prototype.findFacingRooms = function() {
+   let maxRooms = 1;
 
    let tolerance = -1;
    let rooms = this.findPotentialRooms();
