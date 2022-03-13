@@ -498,13 +498,14 @@ function generateMapRooms() {
     for (var room of game.rooms) {
 
 
-      let success = room.findAdjacents();
+     // let success = room.findFacingRooms();
 
-      /*let neighbor = room.nearestNeighbor();
+      let neighbor = room.nearestNeighbor();
  
       if (neighbor) {
          success = room.connectRoom(neighbor);
-      }*/
+      }
+      console.log('success with finding nearest neighbor for '+room.id+': ' + success);
      /* if (!success) {
 
          let rooms = room.findOverlapping();
