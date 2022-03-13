@@ -97,6 +97,7 @@ Game.prototype.reset = function() {
    this.enemies = [];
    this.shadow = [];
    this.map = [];
+   this.rooms = []
 }
 
 Game.prototype.inRoom = function({x,y}) {
@@ -316,9 +317,9 @@ function startGame() {
    function gameSetUp() {
       generatePlayer();
       generateShadow();
-     //  generateItems(STARTING_WEAPONS_AMOUNT, WEAPON_CODE);
-     //  generateItems(STARTING_POTIONS_AMOUNT, POTION_CODE);
-     //  generateEnemies(TOTAL_ENEMIES);
+       generateItems(STARTING_WEAPONS_AMOUNT, WEAPON_CODE);
+       generateItems(STARTING_POTIONS_AMOUNT, POTION_CODE);
+       generateEnemies(TOTAL_ENEMIES);
       drawMap(0, 0, COLS, ROWS);
       updateStats();
       labelRooms();
@@ -484,23 +485,27 @@ function generateMapRooms() {
 
    addRoom(center);
 
-   let maxRooms = 20;
+   let maxRooms = 10;
 
 
    for (var i = 0; i < maxRooms; ++i) {
       addRoom();
    }
 
-   let numRounds = 10;
-   for (var j = 0; j < numRounds; ++j) {
-    let myRooms = game.rooms.filter(x => x.neighbors.length == 0);
-    for (var room of myRooms) {
-      let neighbor = room.nearestNeighbor();
-      let success = null;
+   
+
+   // let myRooms = game.rooms.filter(x => x.neighbors.length == 0);
+    for (var room of game.rooms) {
+
+
+      let success = room.findAdjacents();
+
+      /*let neighbor = room.nearestNeighbor();
+ 
       if (neighbor) {
          success = room.connectRoom(neighbor);
-      }
-      if (!success) {
+      }*/
+     /* if (!success) {
 
          let rooms = room.findOverlapping();
 
@@ -513,25 +518,12 @@ function generateMapRooms() {
                console.log(`last chance -- ${room.id} has connected with ${newRoom.id}`);
                break;
             }
-         }
-
-        /* let n = room.findRoom();
-
-         if (n) {
-            console.log('found overlapping froom for ' + room.id);
-            room.connectRoom(n);
-         }
-         else {
-            console.log('could not find overlapping room for ' + room.id);
-         }*/
-
-          
-      }
-         
-         
-    }
+         }   
+    }*/
    }
-
+   for (var room of game.rooms) {
+      room.connectRemaining();
+   }
    printNeighbors();
 }
 
