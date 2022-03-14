@@ -322,7 +322,7 @@ function startGame() {
       // generateEnemies(TOTAL_ENEMIES);
       drawMap(0, 0, COLS, ROWS);
       updateStats();
-    //  labelRooms();
+      labelRooms();
    }
 
 }
@@ -358,7 +358,7 @@ function resetMap() {
  * 
  */
 function getDim() {
-   const BASE_DIM = 6;
+   const BASE_DIM = 8;
    const EXTRA = 5;
 
    let type = (Math.random() < 0.5) ? 'tall' : 'wide';
@@ -368,6 +368,9 @@ function getDim() {
    width = height = BASE_DIM;
 
    let additional = parseInt(Math.random() * EXTRA);
+
+
+   console.log('extra: ' + additional);
 
    if (type == 'tall') {
       height += additional;
@@ -412,17 +415,16 @@ function setCoords(center, width, height) {
  * Generates one room based on a center point.
  * @param {Object} center {x,y}
  */
+
 function generateRoom(center, width, height) {
 
-
-
-   // get coordinates based on width and height
    let { start, end} = setCoords(center, width, height);
 
    let room = new Room(center, start, end);
 
    room.id = game.curRoomId;
-   game.curRoomId++;
+
+ 
 
    return room;
 
@@ -439,10 +441,7 @@ function addRoom(c) {
       // get a random  number within 
       return limit + parseInt(Math.random() * range);
    }
-   let {
-      width,
-      height
-   } = getDim();
+   let { width, height} = getDim();
 
    let coords = c || {
       x: genCoord(COLS, width),
@@ -459,7 +458,7 @@ function addRoom(c) {
       }
 
    }
-
+   game.curRoomId++;
 
    room.fillMap();
 
@@ -485,7 +484,7 @@ function generateMapRooms() {
 
    addRoom(center);
 
-   let maxRooms = 3;
+   let maxRooms = 30;
 
 
    for (var i = 0; i < maxRooms; ++i) {

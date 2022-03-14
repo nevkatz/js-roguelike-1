@@ -14,8 +14,6 @@ class Room {
 
       this.id = null;
 
-      this.doors = 0;
-
       this.neighbors = [];
    }
 }
@@ -59,7 +57,6 @@ Room.prototype.findFacingRooms = function() {
    let success = false;
    for (var room of rooms) {
 
-      console.log('found adjacent for ' + room.id);
       if ((this.overlapsHoriz(room,tolerance) && !this.roomBetween(this,room)) ||
          //let dist = this.vertDist(room);
           (this.overlapsVert(room, tolerance) && !this.roomBetween(this,room))) {
@@ -71,7 +68,7 @@ Room.prototype.findFacingRooms = function() {
 
       }
       if (this.neighbors.length > maxRooms) {
-         console.log('max rooms exceeded for ' + this.id);
+
          break;
       }
    }
@@ -82,7 +79,7 @@ Room.prototype.searchNeighbors = function(room, arr) {
    for (var room of room.neighbors) {
 
       if (!arr.includes(room)) {
-         console.log('Room' + room.id + ' is connected with room' + this.id);
+  
          arr.push(room);
 
          arr = this.searchNeighbors(room, arr);
@@ -99,29 +96,22 @@ Room.prototype.connectRemaining = function() {
    connectedRooms = this.searchNeighbors(this,connectedRooms);
    let connectedRoomIds = connectedRooms.map(x => x.id);
 
-   console.log(`Room${this.id} is connected to: ` + connectedRoomIds);
 
    let disconnected = rooms.filter(x => !connectedRoomIds.includes(x.id));
 
-   console.log(`Room${this.id} is disconnected from: ` + disconnected.map(x => x.id));
-   console.log('disconnected type: ' + typeof(disconnected[0]));
    for (var room of disconnected) {
 
       let success = this.findNearbyRoom(room, connectedRooms);
 
-      console.log('success with connecting room ' + room.id + ': ' + success);
     }
-    console.log('connectRemaining is over for Room' + this.id);
+
     return;
 }
 
 Room.prototype.overlapsLeft = function(room, wall=0) {
 
-    if (!room.end) {
-      console.log(room + ' has no end value');
-      return false;
-   }
-          // the end is to the right of the other room's start
+
+   // the end is to the right of the other room's start
    return this.end.x + wall >= room.start.x &&
           // the start is to the left of hte other room's end
           this.start.x - wall <= room.end.x;
@@ -144,10 +134,7 @@ Room.prototype.overlapsLeft = function(room, wall=0) {
 }
 Room.prototype.overlapsRight = function(room, wall=0) {
 
-   if (!room.end) {
-      console.log(room + ' has no end value');
-      return false;
-   }
+
    return  this.start.x - wall <= room.end.x &&
            this.end.x + wall >=  room.start.x;
 
@@ -168,10 +155,6 @@ Room.prototype.overlapsRight = function(room, wall=0) {
 }
 Room.prototype.overlapsTop = function(room, wall=0) {
 
-   if (!room.end) {
-      console.log(room + ' has no end value');
-      return false;
-   }
    return this.end.y + wall >= room.start.y &&
           this.start.y - wall <= room.end.y;
 
@@ -189,11 +172,6 @@ Room.prototype.overlapsTop = function(room, wall=0) {
 
 }
 Room.prototype.overlapsBot = function(room, wall=0) {
-
-   if (!room.end) {
-      console.log(room + ' has no end value');
-      return false;
-   }
 
    return this.start.y <= room.end.y + wall  &&
           this.end.y >= room.start.y - wall;
@@ -225,18 +203,10 @@ Room.prototype.overlapsVert = function(room, wall=0) {
 Room.prototype.overlaps = function(room, wall=0) {
    return this.overlapsHoriz(room, wall) && this.overlapsVert(room, wall);
 }
-/*
-Room.prototype.inBounds = function() {
 
-   return this.start.x > OUTER_LIMIT &&
-      this.end.x < COLS - OUTER_LIMIT &&
-      this.start.y > OUTER_LIMIT &&
-      this.end.y < ROWS - OUTER_LIMIT;
-}*/
 
 Room.prototype.fillMap = function() {
-   console.log(`room${this.id} start: (${this.start.x},${this.start.y})`);
-   console.log(`room${this.id} end: (${this.end.x},${this.end.y})`);
+
    for (var y = this.start.y; y <= this.end.y; ++y) {
       for (var x = this.start.x; x <= this.end.x; ++x) {
 
@@ -245,31 +215,7 @@ Room.prototype.fillMap = function() {
    }
 }
 
-/*
-Room.prototype.getDoors = function(room) {
-   let doors = {
-      top: {
-         x: this.center.x,
-         y: this.start.y,
-      },
 
-      bot: {
-         x: this.center.x,
-         y: this.end.y
-      },
-
-      left: {
-         x: this.start.x,
-         y: this.center.y
-      },
-
-      right: {
-         x: this.end.x,
-         y: this.center.y
-      }
-   };
-   return doors;
-}*/
 Room.prototype.contains = function(x, prop) {
    return x >= this.start[prop] && x <= this.end[prop];
 }
@@ -300,7 +246,6 @@ Room.prototype.betweenHoriz = function(room1,room2) {
           ((this.center.x < room1.center.x && this.center.x > room2.center.x) ||
           (this.center.x < room2.center.x && this.center.x > room1.center.x));
 
-   console.log(`${this.id} betweenHoriz => ${room1.id} and ${room2.id} => ${b}`);
 
    return b;
 }
@@ -309,8 +254,6 @@ Room.prototype.betweenVert = function(room1,room2) {
          ((this.center.y < room1.center.y && this.center.y > room2.center.y) ||
           (this.center.y < room2.center.y && this.center.y > room1.center.y));
 
-   console.log(`${this.id} betweenVert => ${room1.id} and ${room2.id} => ${b}`);
-   console.log('betweenVert: ' + b);
 
    return b;
 
@@ -337,7 +280,6 @@ Room.prototype.connectRoom = function(room) {
 
    if (this.overlapsHoriz(room, tolerance) || this.overlapsVert(room,tolerance)) {
 
-     // console.log(`room${this.id} direct connecting with ${room.id}`);
      
       success = this.connectDirect(room, tolerance);
    }
@@ -703,17 +645,11 @@ Room.prototype.nearestNeighbor = function() {
    let shortest = null,
       nearestRoom = null;
 
-  /* if (this.neighbors.length >= maxNeighbors) {
-      return;
-   }*/
    let rooms = this.findPotentialRooms();
 
    for (var room of rooms) {
 
-     /* if (room.neighbors.length >= maxNeighbors) {
-         console.log(`room${room.id} -- neighbors (${room.neighbors.length}) maxed out.`);
-         continue;
-      }*/
+  
 
       let diffX = this.x - room.x;
       let diffY = this.y - room.y;

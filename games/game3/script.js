@@ -414,15 +414,12 @@ function setCoords(center, width, height) {
  */
 function generateRoom(center, width, height) {
 
-
-
    // get coordinates based on width and height
-   let { start, end} = setCoords(center, width, height);
+   let { start, end } = setCoords(center, width, height);
 
    let room = new Room(center, start, end);
 
    room.id = game.curRoomId;
-   game.curRoomId++;
 
    return room;
 
@@ -451,7 +448,6 @@ function addRoom(c) {
 
    let room = generateRoom(coords, width, height);
 
-
    for (var gameRoom of game.rooms) {
 
       if (room.overlaps(gameRoom, 1)) {
@@ -459,6 +455,8 @@ function addRoom(c) {
       }
 
    }
+
+   game.curRoomId++;
 
 
    room.fillMap();

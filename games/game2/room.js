@@ -7,14 +7,12 @@ class Room {
    constructor(center, start, end) {
 
       this.center = center;
-      // upper left
+   
       this.start = start;
-      // bottom right
+ 
       this.end = end;
 
       this.id = null;
-
-      this.doors = 0;
 
       this.neighbors = [];
    }

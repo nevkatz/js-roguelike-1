@@ -14,11 +14,7 @@ class Game {
       this.curRoomId = 0;
 
       this.map = [];
-      this.shadow = [];
 
-      this.isShadowToggled = false;
-
-      this.enemies = [];
       this.canvas = null;
 
       this.context = null;
@@ -56,22 +52,14 @@ const TILE_COLORS = [
 var game = null;
 
 function createDOM() {
-
    let container = document.getElementById('container');
-
-
    // add canvas
    let canvas = document.createElement('canvas');
    canvas.id = 'grid';
-
-
-
    canvas.height = ROWS * TILE_DIM;
    canvas.width = COLS * TILE_DIM;
 
    container.appendChild(canvas);
-
-
 }
 
 /**
