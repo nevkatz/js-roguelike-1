@@ -1,3 +1,30 @@
+
+/**
+ * 
+ * Constants
+ */ 
+
+const OUTER_LIMIT = 3;
+
+const SHADOW_CODE = 0;
+const VISIBLE_CODE = 1;
+
+const WALL_CODE = 0;
+const FLOOR_CODE = 1;
+
+const COLS = 80;
+const ROWS = 60;
+const TILE_DIM = 10;
+
+const TILE_COLORS = [
+   'grey',
+   'white',
+];
+// game object
+
+var game = null;
+
+
 /**
  * Creates a new game. 
  * @class
@@ -155,25 +182,6 @@ Game.prototype.reset = function() {
    this.rooms = []
 }
 
-const OUTER_LIMIT = 3;
-
-const SHADOW_CODE = 0;
-const VISIBLE_CODE = 1;
-
-const WALL_CODE = 0;
-const FLOOR_CODE = 1;
-
-const COLS = 80;
-const ROWS = 60;
-const TILE_DIM = 10;
-
-const TILE_COLORS = [
-   'grey',
-   'white',
-];
-// game object
-
-var game = null;
 
 function createDOM() {
    let container = document.getElementById('container');
