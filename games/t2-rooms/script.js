@@ -375,7 +375,7 @@ function generateMapRooms() {
 
    addRoom(center);
 
-   let maxRooms = 10;
+   let maxRooms = 100;
 
    for (var i = 0; i < maxRooms; ++i) {
       addRoom();

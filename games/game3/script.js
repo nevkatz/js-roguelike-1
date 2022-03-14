@@ -1,28 +1,59 @@
 /**
- * @TODO: 
+ *  Game Constants
  * 
- * Swap in a rooms algorithmm
- * 
- * Add swipe logic
- * 
- * Add scrolling logic
- * 
- * For drawObject and drawMap, we need scrolling logic.
- * 
- * 
- * For scroll to work we probably need the player on a separate canvas. 
- * If shadow is on, redraw just the visible square
- * If whole map is visible, redraw the canvas that is visible in the viewport
- * May need to redraw the map if viewport changes, so perhaps keep that constant 
- * 
- * Include an "offset" variable in the map object.
- * 
- * If we are changing the viewport as we resize, then it actually makes sense to keep track of hte tile the player is on
- * and move the canvas based on the viewport
- * Otherwise the map has to be redrawn every time you want to change the viewport
- * 
- *
- */
+ */ 
+const OUTER_LIMIT = 3;
+
+const SHADOW_CODE = 0;
+const VISIBLE_CODE = 1;
+
+const WALL_CODE = 0;
+const FLOOR_CODE = 1;
+const PLAYER_CODE = 2;
+const ENEMY_CODE = 3;
+const POTION_CODE = 4;
+const WEAPON_CODE = 5;
+
+const POTIONS = [10, 20, 30, 40, 50];
+
+// possible health that enemies can have
+const ENEMIES_HEALTH = [30, 30, 30, 30, 40, 40, 60, 80];
+
+// possible damage that enemies can inflict
+const ENEMIES_DAMAGE = [30, 30, 30, 30, 40, 40, 60, 80];
+
+const POINTS_PER_LEVEL = 100;
+
+// the visible area
+const VISIBILITY = 3;
+
+// dimensions
+const COLS = 80;
+const ROWS = 60;
+const TILE_DIM = 10;
+
+
+
+// total enemies
+const TOTAL_ENEMIES = 30;
+const STARTING_POTIONS_AMOUNT = 10;
+const STARTING_WEAPONS_AMOUNT = 10;
+
+const TILE_COLORS = [
+   // wall
+   'grey',
+   // floor
+   'white',
+   // player
+   'blue',
+   // enemy
+   'red',
+   // health drop
+   'green',
+   // weapon
+   'orange'
+];
+
 
 /**
  * Classes 
@@ -176,58 +207,6 @@ const WEAPONS = [{
    }
 ];
 
-const OUTER_LIMIT = 3;
-
-const SHADOW_CODE = 0;
-const VISIBLE_CODE = 1;
-
-const WALL_CODE = 0;
-const FLOOR_CODE = 1;
-const PLAYER_CODE = 2;
-const ENEMY_CODE = 3;
-const POTION_CODE = 4;
-const WEAPON_CODE = 5;
-
-const POTIONS = [10, 20, 30, 40, 50];
-
-// possible health that enemies can have
-const ENEMIES_HEALTH = [30, 30, 30, 30, 40, 40, 60, 80];
-
-// possible damage that enemies can inflict
-const ENEMIES_DAMAGE = [30, 30, 30, 30, 40, 40, 60, 80];
-
-const POINTS_PER_LEVEL = 100;
-
-// the visible area
-const VISIBILITY = 3;
-
-// dimensions
-const COLS = 80;
-const ROWS = 60;
-const TILE_DIM = 10;
-
-
-
-// total enemies
-const TOTAL_ENEMIES = 10;
-const STARTING_POTIONS_AMOUNT = 4;
-const STARTING_WEAPONS_AMOUNT = 3;
-
-const TILE_COLORS = [
-   // wall
-   'grey',
-   // floor
-   'white',
-   // player
-   'blue',
-   // enemy
-   'red',
-   // health drop
-   'green',
-   // weapon
-   'orange'
-];
-
 // game object
 
 /**
@@ -322,7 +301,7 @@ function startGame() {
        generateEnemies(TOTAL_ENEMIES);
       drawMap(0, 0, COLS, ROWS);
       updateStats();
-      labelRooms();
+     // labelRooms();
    }
 
 }
@@ -483,7 +462,7 @@ function generateMapRooms() {
 
    addRoom(center);
 
-   let maxRooms = 10;
+   let maxRooms = 30;
 
 
    for (var i = 0; i < maxRooms; ++i) {
