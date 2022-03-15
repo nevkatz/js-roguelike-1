@@ -1,6 +1,6 @@
 ## Nevin's Roguelike Tutorials
 
-Welcome! Below is an explanation of each directory within ``games``.
+Welcome! This is a space that contains some of my work on JavaScript Roguelike games. Below is an explanation of each directory within ``games``.
 
 ``experimental-rooms``- this contains in-progress code I am working on.
 
@@ -8,10 +8,10 @@ Welcome! Below is an explanation of each directory within ``games``.
 
 ``game-2-connected-rooms`` - updated version that with a rooms algorithm swapped in.
 
-``tutorial-rooms`` - produces disconnected, labeled roms for deom and tutorial purposes.
+``tutorial-rooms`` - produces disconnected, labeled rooms for demo and tutorial purposes.
 
 ## Credits
 
-The original "Drunkard's walk" roguelike is a fork of a pen created on CodePen.io. Original URL: [https://codepen.io/nevkatz/pen/QWOmaGm](https://codepen.io/nevkatz/pen/QWOmaGm).
+The original "Drunkard's walk" roguelike is a fork of a pen created on CodePen.io by Nicola at this URL: [https://codepen.io/ni-kun/pen/jWKWom](https://codepen.io/ni-kun/pen/jWKWom).
 
-http://www.freecodecamp.com/challenges/build-a-roguelike-dungeon-crawler-game
+
