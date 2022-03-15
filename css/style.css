@@ -1,0 +1,64 @@
+/* https://codepen.io/ni-kun/pen/jWKWom */
+/* general styles */
+ body {
+     font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+     font-size: 14px;
+     line-height: 1.42857143;
+}
+ label {
+     font-weight: bold;
+}
+ canvas {
+     padding-left: 0;
+     padding-right: 0;
+     margin-left: auto;
+     margin-right: auto;
+     display: block;
+}
+ #container {
+     margin-top: 50px;
+     text-align: center;
+}
+/* stats */
+ * {
+     color: white;
+     background-color: black;
+}
+ ul#hud {
+     list-style-type: none;
+     display: flex;
+     justify-content: center;
+}
+ ul#hud li {
+     margin-left: 5px;
+     margin-right: 5px;
+}
+/* button styles */
+ button {
+     margin: 30px;
+     display: inline-block;
+     margin-bottom: 0;
+     font-weight: 400;
+     text-align: center;
+     vertical-align: middle;
+     cursor: pointer;
+ 
+     border: 1px solid transparent;
+     white-space: nowrap;
+     padding: 6px 12px;
+     font-size: 14px;
+     line-height: 1.42;
+     border-radius: 4px;
+     -webkit-appearance: none;
+}
+ button.toggle {
+     color: #fff;
+     background-color: #5cb85c;
+     border-color: #4cae4c;
+}
+ button.toggle:hover {
+     color: #fff;
+     background-color: #47a447;
+     border-color: #398439;
+}
+ 
