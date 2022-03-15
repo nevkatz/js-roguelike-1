@@ -589,7 +589,7 @@ function enemyDefeated(enemy) {
    drawMap(left, top, right, bot);
 
    // add experience points
-   player.xp += parseInt((enemy.damage + enemy.health)/2);
+   player.xp += Math.round((enemy.damage + enemy.health)/2);
 
    // calculate the level in points. Level 1 has no experience so machine-wise it is level 0.
    let level_in_points = POINTS_PER_LEVEL * (player.level - 1)

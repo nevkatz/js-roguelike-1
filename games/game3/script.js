@@ -336,7 +336,7 @@ function resetMap() {
  * Randomly generates a set of dimensions.
  * 
  */
-function getDim() {
+function genDim() {
    const BASE_DIM = 6;
    const EXTRA = 5;
 
@@ -346,7 +346,7 @@ function getDim() {
 
    width = height = BASE_DIM;
 
-   let additional = parseInt(Math.random() * EXTRA);
+   let additional = Math.round(Math.random() * EXTRA);
 
    if (type == 'tall') {
       height += additional;
@@ -366,11 +366,11 @@ function getDim() {
  * @param {Number} width
  * 
  */
-function setCoords(center, width, height) {
+function setRoomCoords(center, width, height) {
 
 
-   let halfW = parseInt(width / 2);
-   let halfH = parseInt(height / 2);
+   let halfW = Math.round(width / 2);
+   let halfH = Math.round(height / 2);
 
    let start = {
       x: center.x - halfW,
@@ -394,7 +394,7 @@ function setCoords(center, width, height) {
 function generateRoom(center, width, height) {
 
    // get coordinates based on width and height
-   let { start, end } = setCoords(center, width, height);
+   let { start, end } = setRoomCoords(center, width, height);
 
    let room = new Room(center, start, end);
 
@@ -405,24 +405,24 @@ function generateRoom(center, width, height) {
 }
 
 function addRoom(c) {
-   const genCoord = (maxCells, dim) => {
+   const genCenterCoord = (maxCells, dim) => {
       // get limit on either side based on outer limit and a room dimension - width or height
-      let limit = OUTER_LIMIT + parseInt(dim / 2);
+      let limit = OUTER_LIMIT + Math.round(dim / 2);
 
       // get range based on cells in array - limit on either side.
       let range = maxCells - 2 * limit;
 
       // get a random  number within 
-      return limit + parseInt(Math.random() * range);
+      return limit + Math.round(Math.random() * range);
    }
    let {
       width,
       height
-   } = getDim();
+   } = genDim();
 
    let coords = c || {
-      x: genCoord(COLS, width),
-      y: genCoord(ROWS, height)
+      x: genCenterCoord(COLS, width),
+      y: genCenterCoord(ROWS, height)
    }
 
    let room = generateRoom(coords, width, height);
@@ -870,7 +870,7 @@ function enemyDefeated(enemy) {
    drawMap(left, top, right, bot);
 
    // add experience points
-   player.xp += parseInt((enemy.damage + enemy.health) / 2);
+   player.xp += Math.round((enemy.damage + enemy.health) / 2);
 
    // calculate the level in points. Level 1 has no experience so machine-wise it is level 0.
    let level_in_points = POINTS_PER_LEVEL * (player.level - 1)

@@ -4,6 +4,9 @@
  * Constants
  */ 
 
+const COLS = 80;
+const ROWS = 60;
+
 const OUTER_LIMIT = 3;
 
 const SHADOW_CODE = 0;
@@ -12,8 +15,7 @@ const VISIBLE_CODE = 1;
 const WALL_CODE = 0;
 const FLOOR_CODE = 1;
 
-const COLS = 80;
-const ROWS = 60;
+
 const TILE_DIM = 10;
 
 const TILE_COLORS = [
@@ -86,9 +88,9 @@ Room.prototype.overlapsVert = function(room, wall=0) {
 }
 Room.prototype.overlapsLeft = function(room, wall=0) {
 
-          // the end is to the right of the other room's start
+   // the end is to the right of the other room's start
    return this.end.x + wall >= room.start.x &&
-          // the start is to the left of hte other room's end
+   // the start is to the left of hte other room's end
           this.start.x - wall <= room.end.x;
 
  /**
@@ -131,19 +133,15 @@ Room.prototype.overlapsTop = function(room, wall=0) {
 
    return this.end.y + wall >= room.start.y &&
           this.start.y - wall <= room.end.y;
-
  /**
   *    *--------* <-- this.start.y
   *    |        | 
   *    |  this  |
   *    |        |    *---------* <- room.start.y
-  *    |        |    |         |
   *    *--------*    |  other  |
-  *                  |  room   |
-  *    |             |         |  
+  *    |             |  room   |
   *  this.end.y      *---------* <- room.end.y
   */                 
-
 }
 Room.prototype.overlapsBot = function(room, wall=0) {
 
@@ -205,35 +203,28 @@ function init() {
    game = new Game();
    game.canvas = document.getElementById("grid");
    game.context = game.canvas.getContext("2d");
-   startGame();
+
+   generateMapRooms();
+   
+   drawMap(0, 0, COLS, ROWS);
+   
+   labelRooms();
 
 }
 init();
 
-
-/**
- * Start Game
- */
-
-
-function startGame() {
-
-   generateMapRooms();
-
-   setTimeout(gameSetUp, 1000);
-
-   function gameSetUp() {
-      drawMap(0, 0, COLS, ROWS);
-      labelRooms();
-   }
-
-}
 function labelRooms() {
    game.context.fillStyle ='black';
    game.context.font = '15px Arial';
    game.rooms.forEach(function(room) {
+
       let txt = `r${room.id} (${room.start.x},${room.start.y})`;
-      game.context.fillText(txt, (room.start.x+1)*TILE_DIM, room.center.y*TILE_DIM);
+
+      let x = (room.start.x+1)*TILE_DIM;
+  
+      let y = room.center.y*TILE_DIM;
+      
+      game.context.fillText(txt, x, y);
    });
 }
    
@@ -250,14 +241,13 @@ function resetMap() {
          game.map[row].push(WALL_CODE);
       }
    }
-
 }
 
 /**
  * Randomly generates a set of dimensions.
  * 
  */
-function getDim() {
+function genDim() {
    const BASE_DIM = 6;
    const EXTRA = 5;
 
@@ -267,7 +257,7 @@ function getDim() {
 
    width = height = BASE_DIM;
 
-   let additional = parseInt(Math.random() * EXTRA);
+   let additional = Math.round(Math.random() * EXTRA);
 
    if (type == 'tall') {
       height += additional;
@@ -287,11 +277,11 @@ function getDim() {
  * @param {Number} width
  * 
  */
-function setCoords(center, width, height) {
+function setRoomCoords(center, width, height) {
 
 
-   let halfW = parseInt(width / 2);
-   let halfH = parseInt(height / 2);
+   let halfW = Math.round(width / 2);
+   let halfH = Math.round(height / 2);
 
    let start = {
       x: center.x - halfW,
@@ -315,7 +305,7 @@ function setCoords(center, width, height) {
 function generateRoom(center, width, height) {
 
    // get coordinates based on width and height
-   let { start, end } = setCoords(center, width, height);
+   let { start, end } = setRoomCoords(center, width, height);
 
    let room = new Room(center, start, end);
 
@@ -324,26 +314,23 @@ function generateRoom(center, width, height) {
    return room;
 
 }
-
-function addRoom(c) {
-   const genCoord = (maxCells, dim) => {
+function genCenterCoord (maxCells, dim) {
       // get limit on either side based on outer limit and a room dimension - width or height
-      let limit = OUTER_LIMIT + parseInt(dim / 2);
+      let limit = OUTER_LIMIT + Math.round(dim / 2);
 
       // get range based on cells in array - limit on either side.
       let range = maxCells - 2 * limit;
 
       // get a random  number within 
-      return limit + parseInt(Math.random() * range);
-   }
-   let {
-      width,
-      height
-   } = getDim();
+      return limit + Math.round(Math.random() * range);
+}
+function addRoom(c) {
+
+   let { width, height } = genDim();
 
    let coords = c || {
-      x: genCoord(COLS, width),
-      y: genCoord(ROWS, height)
+      x: genCenterCoord(COLS, width),
+      y: genCenterCoord(ROWS, height)
    }
 
    let room = generateRoom(coords, width, height);
@@ -376,18 +363,23 @@ function generateMapRooms() {
 
    resetMap();
 
-   let center = {
-      x: COLS / 2,
-      y: ROWS / 2
-   };
-
-   addRoom(center);
-
    let maxRooms = 100;
 
    for (var i = 0; i < maxRooms; ++i) {
       addRoom();
    }
+
+   /*
+
+   // Beware the infinite loop 
+
+   let minRooms = 100;
+
+   while (game.rooms.length < 10) { 
+      addRoom();
+   }
+
+   */
 }
 
 /**
@@ -408,15 +400,12 @@ function drawMap(startX, startY, endX, endY) {
    for (var row = startY; row < endY; row++) {
 
       for (var col = startX; col < endX; col++) {
-
-         let color = null;
-
       
-         let c_idx = game.map[row][col];
+         let idx = game.map[row][col];
 
-         color = TILE_COLORS[c_idx];
+         let tileCode = TILE_COLORS[idx];
          
-         drawObject(col, row, color);
+         drawObject(col, row, tileCode);
 
       } // end loop
    }
