@@ -504,22 +504,7 @@ function generateMapRooms() {
       if (neighbor) {
          success = room.connectRoom(neighbor);
       }
-      console.log('success with finding nearest neighbor for '+room.id+': ' + success);
-     /* if (!success) {
 
-         let rooms = room.findOverlapping();
-
-
-         for (var newRoom of rooms) {
-
-            success = room.connectRoom(newRoom);
-
-            if (success) {
-               console.log(`last chance -- ${room.id} has connected with ${newRoom.id}`);
-               break;
-            }
-         }   
-    }*/
    }
    for (var room of game.rooms) {
      room.connectRemaining();

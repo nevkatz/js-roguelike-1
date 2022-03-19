@@ -143,33 +143,6 @@ Game.prototype.inRoom = function({x,y}) {
 }
 
 
-function checkAdjacentVert(path, testX) {
-
-   let score = 0;
-   let limit = 5;
-
-   let x = testX || path.start.x;
-      for (var y = path.start.y; y <= path.end.y; ++y) {
-         if (game.map[y][x-1] == FLOOR_CODE ||
-             game.map[y][x+1] == FLOOR_CODE)
-         score++;
-      }
-   return score < limit;
-}
-
-function checkAdjacentHoriz(path, testY) {
-   let score = 0;
-   let limit = 5;
-   let y = testY || path.start.y;
-
-      for (var x = path.start.x; x <= path.end.x; ++x) {
-         if ((game.map[y-1] && game.map[y-1][x] == FLOOR_CODE) ||
-             (game.map[y+1] && game.map[y+1][x] == FLOOR_CODE))
-         
-         score++;
-      }
-   return score < limit;
-}
 
 function addPath(path, id) {
 

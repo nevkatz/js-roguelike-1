@@ -19,6 +19,104 @@ class Room {
 }
 
 /**
+ * Oerlaps and fillMap methods
+ * 
+ */ 
+
+Room.prototype.fillMap = function() {
+
+   for (var y = this.start.y; y <= this.end.y; ++y) {
+      for (var x = this.start.x; x <= this.end.x; ++x) {
+
+         game.map[y][x] = FLOOR_CODE;
+      }
+   }
+}
+// we need both a vertical or horizontal overlap.
+
+Room.prototype.overlapsHoriz = function(room, wall=0) {
+   return this.overlapsRight(room, wall) || this.overlapsLeft(room, wall);
+}
+Room.prototype.overlapsVert = function(room, wall=0) {
+   return this.overlapsTop(room, wall) || this.overlapsBot(room, wall);
+}
+Room.prototype.overlapsLeft = function(room, wall=0) {
+
+   // the end is to the right of the other room's start
+   return this.end.x + wall >= room.start.x &&
+   // the start is to the left of hte other room's end
+          this.start.x - wall <= room.end.x;
+
+ /**
+  * 
+  * Here the doorLine of overlap is between other.start.x and this.end.x
+  * 
+  * this.start.x
+  *   |
+  *   *--------* <- this.end.x
+  *   |  this  |
+  *   *--------*
+  *        *--------* <- room.end.x
+  *        |  other |
+  *        *--------*
+  *        |
+  *   room.start.x
+  */
+}
+Room.prototype.overlapsRight = function(room, wall=0) {
+
+   return  this.start.x - wall <= room.end.x &&
+           this.end.x + wall >=  room.start.x;
+
+ /**
+  * 
+  *          this.start.x
+  *             |
+  *             *--------* <- this.end.x
+  *             |  this  |
+  *             *--------*
+  *       *--------* <- room.end.x
+  *       |  other |
+  *       *--------*
+  *        |
+  *  room.start.x
+  */
+
+}
+Room.prototype.overlapsTop = function(room, wall=0) {
+
+   return this.end.y + wall >= room.start.y &&
+          this.start.y - wall <= room.end.y;
+ /**
+  *    *--------* <-- this.start.y
+  *    |        | 
+  *    |  this  |
+  *    |        |    *---------* <- room.start.y
+  *    *--------*    |  other  |
+  *    |             |  room   |
+  *  this.end.y      *---------* <- room.end.y
+  */                 
+}
+Room.prototype.overlapsBot = function(room, wall=0) {
+
+
+   return this.start.y <= room.end.y + wall  &&
+          this.end.y >= room.start.y - wall;
+
+ /**
+  *    *--------* <-- room.start.y
+  *    |        | 
+  *    |  other |
+  *    |  room  |    *---------* <- this.start.y
+  *    |        |    |         |
+  *    *--------*    |   this  |
+  *    |             |         |  
+  *  room.end.y      *---------* <- this.end.y
+  */                 
+
+}
+
+/**
  *  Used
  */ 
 Room.prototype.findOverlapping = function() {
@@ -29,26 +127,7 @@ Room.prototype.findOverlapping = function() {
 
    return rooms;
 }
-Room.prototype.horizDist = function(room) {
-   return this.onLeft(room) ? room.start.x - this.end.x : this.start.x - room.end.x;
-}
-Room.prototype.vertDist = function(room) {
-   return this.onTop(room) ? room.start.y - this.end.y : this.start.y - room.end.y;
-}
 
-Room.prototype.adjacentVert = function(room, limit) {
-   return this.horizDist(room) < limit && this.overlapsVert(room);
-}
-
-Room.prototype.adjacentHoriz = function(room, limit) {
-   return this.vertDist(room) < limit && this.overlapsHoriz(room);
-}
-Room.prototype.isAdjacent = function(room) {
-
-   let limit = 4;
-
-   return this.adjacentVert(room, limit) || this.adjacentHoriz(room, limit);
-}
 Room.prototype.findFacingRooms = function() {
    let maxRooms = 1;
 
@@ -108,94 +187,8 @@ Room.prototype.connectRemaining = function() {
     return;
 }
 
-Room.prototype.overlapsLeft = function(room, wall=0) {
 
 
-   // the end is to the right of the other room's start
-   return this.end.x + wall >= room.start.x &&
-          // the start is to the left of hte other room's end
-          this.start.x - wall <= room.end.x;
-
- /**
-  * 
-  * Here the doorLine of overlap is between other.start.x and this.end.x
-  * 
-  * this.start.x
-  *   |
-  *   *--------* <- this.end.x
-  *   |  this  |
-  *   *--------*
-  *        *--------* <- room.end.x
-  *        |  other |
-  *        *--------*
-  *        |
-  *   room.start.x
-  */
-}
-Room.prototype.overlapsRight = function(room, wall=0) {
-
-
-   return  this.start.x - wall <= room.end.x &&
-           this.end.x + wall >=  room.start.x;
-
- /**
-  * 
-  *          this.start.x
-  *             |
-  *             *--------* <- this.end.x
-  *             |  this  |
-  *             *--------*
-  *       *--------* <- room.end.x
-  *       |  other |
-  *       *--------*
-  *        |
-  *  room.start.x
-  */
-
-}
-Room.prototype.overlapsTop = function(room, wall=0) {
-
-   return this.end.y + wall >= room.start.y &&
-          this.start.y - wall <= room.end.y;
-
- /**
-  *    *--------* <-- this.start.y
-  *    |        | 
-  *    |  this  |
-  *    |        |    *---------* <- room.start.y
-  *    |        |    |         |
-  *    *--------*    |  other  |
-  *                  |  room   |
-  *    |             |         |  
-  *  this.end.y      *---------* <- room.end.y
-  */                 
-
-}
-Room.prototype.overlapsBot = function(room, wall=0) {
-
-   return this.start.y <= room.end.y + wall  &&
-          this.end.y >= room.start.y - wall;
-
- /**
-  *    *--------* <-- room.start.y
-  *    |        | 
-  *    |  other |
-  *    |  room  |    *---------* <- this.start.y
-  *    |        |    |         |
-  *    *--------*    |   this  |
-  *    |             |         |  
-  *  room.end.y      *---------* <- this.end.y
-  */                 
-
-}
-// we need both a vertical or horizontal overlap.
-
-Room.prototype.overlapsHoriz = function(room, wall=0) {
-   return this.overlapsRight(room, wall) || this.overlapsLeft(room, wall);
-}
-Room.prototype.overlapsVert = function(room, wall=0) {
-   return this.overlapsTop(room, wall) || this.overlapsBot(room, wall);
-}
 /**
  * Used to eliminate rooms.
  * 
@@ -206,10 +199,8 @@ Room.prototype.overlaps = function(room, wall=0) {
 
 
 Room.prototype.fillMap = function() {
-
    for (var y = this.start.y; y <= this.end.y; ++y) {
       for (var x = this.start.x; x <= this.end.x; ++x) {
-
          game.map[y][x] = FLOOR_CODE;
       }
    }
@@ -314,12 +305,12 @@ Room.prototype.cornerVert = function(room, corner) {
        * this
        */
       if (this.onLeft(room)) {
-         horiz = new Path({
+         horiz = {
             // start at corner
             start:corner,
             // and on left of this 
             end:{x:room.start.x,y:room.center.y}
-         });
+         };
       }
       /**  
        *  room ---*
@@ -327,10 +318,10 @@ Room.prototype.cornerVert = function(room, corner) {
        *         this
        */
       if (this.onRight(room)) {
-           horiz = new Path({ 
+           horiz = { 
              start:{x:room.end.x, y:room.center.y},
              end:corner,
-           });
+           };
       }
 
       /**
@@ -339,12 +330,12 @@ Room.prototype.cornerVert = function(room, corner) {
        *      *---room
        */ 
       if (this.above(room)) {
-           vert = new Path({
+           vert = {
              // start at corner, go down
              start:{x:this.center.x,y:this.end.y},
              // end at top center of other room
              end:corner
-           });
+           };
       }
       /**  
        *  room ---*
@@ -352,13 +343,13 @@ Room.prototype.cornerVert = function(room, corner) {
        *         this
        */
       if (this.below(room)) {
-          vert = new Path({
+          vert = {
             start:corner,
             end:{x:this.center.x, y:this.start.y},
-          });
+          };
       }
 
-      if (vert.checkAdjacentVert() && horiz.checkAdjacentHoriz()) {
+      if (checkAdjacentVert(vert) && checkAdjacentHoriz(horiz)) {
            addPath(vert);
            addPath(horiz);
 
@@ -390,10 +381,10 @@ Room.prototype.cornerHoriz = function(room, corner) {
        *            room
        */
       if (this.onLeft(room)) {
-           horiz = new Path({ 
+           horiz = { 
              start:{x:this.end.x, y:this.center.y},
              end:corner,
-            });
+            };
       };
       /**
        *  *--- this (onRight)
@@ -402,12 +393,12 @@ Room.prototype.cornerHoriz = function(room, corner) {
        * room
        */
       if (this.onRight(room)) {
-         horiz = new Path({
+         horiz = {
             // start at corner
             start:corner,
             // and on left of this 
             end:{x:this.start.x,y:this.center.y}
-         });
+         };
       }
       /**
        *    this---*
@@ -416,12 +407,12 @@ Room.prototype.cornerHoriz = function(room, corner) {
        * 
        */ 
       if (this.above(room)) {
-           vert = new Path({
+           vert = {
              // start at corner, go down
              start:corner,
              // end at top center of other room
              end:{x:room.center.x, y:room.start.y}
-           });
+           };
       }
       /*
 
@@ -431,12 +422,12 @@ Room.prototype.cornerHoriz = function(room, corner) {
       *----this        this----*
        */
       if (this.below(room)) {
-          vert = new Path({
+          vert = {
             start:{x:room.center.x, y:room.end.y},
             end:corner
-          });
+          };
       }
-      if (vert.checkAdjacentVert() &&  horiz.checkAdjacentHoriz()) {
+      if (checkAdjacentVert(vert) && checkAdjacentHoriz(horiz)) {
            addPath(vert);
            addPath(horiz);
       }
@@ -450,11 +441,29 @@ Room.prototype.cornerHoriz = function(room, corner) {
 Room.prototype.connectDirect = function(room, tolerance) {
 
  console.log(`${this.id} is using directConnect  with ${room.id}`);
- let found = false;
- let doorLine = new Path();
+   let found = false;
+ let doorLine = {
+      start:{
+         x:0,
+         y:0
+      },
+      end:{
+         x:0,
+         y:0
+      }
+   };
 
- let path = new Path();
- let limit = 1;
+   let path = {
+      start:{
+         x:0,
+         y:0
+      },
+      end:{
+         x:0,
+         y:0
+      }
+   };
+   let limit = 1;
    if (this.overlapsHoriz(room, tolerance)) {
 
         if (Math.abs(this.start.x - room.start.x) < limit ||
@@ -492,8 +501,7 @@ Room.prototype.connectDirect = function(room, tolerance) {
        }
 
          for (var x = doorLine.start.x; x <= doorLine.end.x; ++x) {
-           if (room.contains(x, 'x') && this.contains(x, 'x') && 
-               path.checkAdjacentVert(x)) {
+           if (room.contains(x, 'x') && this.contains(x, 'x') && checkAdjacentVert(path,x)) {
             found = true;
             path.start.x = path.end.x = x;
            }
@@ -544,8 +552,7 @@ Room.prototype.connectDirect = function(room, tolerance) {
        // get a viable vertical position
 
        for (var y = doorLine.start.y; y <= doorLine.end.y; ++y) {
-         if (room.contains(y, 'y') && this.contains(y, 'y') && 
-             path.checkAdjacentHoriz(y)) {
+         if (room.contains(y, 'y') && this.contains(y, 'y') && checkAdjacentHoriz(path,y)) {
             path.start.y = path.end.y = y;
             found = true;
          }

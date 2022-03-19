@@ -505,7 +505,7 @@ Room.prototype.cornerHoriz = function(room, corner) {
 }
 Room.prototype.connectDirect = function(room, tolerance) {
 
- console.log(`${this.id} is using directConnect  with ${room.id}`);
+
    let found = false;
  let doorLine = {
       start:{
