@@ -27,40 +27,6 @@ const TILE_COLORS = [
 var game = null;
 
 
-/**
- * Creates a new game. 
- * @class
- * 
- * @property {Array} map - 2D array storing integer codes
- * @property {Array} shadow - 2D array holding a map of the shadow
- * @property {Boolean} isShadowToggled - is shadow on or off? 
- * @property {HTMLElement} canvas - the DOM element
- * @property {Object} context - the bundle of drawing methods tied to the canvas
- */
-class Game {
-   constructor() {
-      this.rooms = [];
-      this.curRoomId = 0;
-
-      this.map = [];
-
-      this.canvas = null;
-
-      this.context = null;
-   }
-}
-/**
- * Reset all level-specific properties
- * 
- */
-Game.prototype.reset = function() {
-   this.enemies = [];
-   this.shadow = [];
-   this.map = [];
-   this.rooms = []
-}
-
-
 function createDOM() {
    let container = document.getElementById('container');
    // add canvas
@@ -86,11 +52,9 @@ function init() {
 
  //  generateMapRooms();
    
-   testThree();
+   testOverlapRight();
 
-   drawMap(0, 0, COLS, ROWS);
-   
-   labelRooms();
+
 
 }
 init();
@@ -107,9 +71,15 @@ function labelRooms() {
       let y = room.center.y*TILE_DIM;
       
       game.context.fillText(txt, x, y);
+
+      y+= 2*TILE_DIM;
+
+       let end= `end: (${room.end.x},${room.end.y})`;
+
+
+      game.context.fillText(end,x,y);
    });
 }
-   
 function resetMap() {
 
    game.map = [];
@@ -282,7 +252,15 @@ function drawMap(startX, startY, endX, endY) {
       } // end loop
    }
 }
+function drawBox(x,y,w,h,color,width) {
+   game.context.globalAlpha = 1;
+   game.context.beginPath();
+   game.context.rect(x * TILE_DIM, y * TILE_DIM, w*TILE_DIM, h*TILE_DIM);
+   game.context.strokeStyle = color;
+   game.context.lineWidth = width || 4;
+   game.context.stroke();
 
+}
 /**
  * @param {Number} x
  * @param {Number} y

@@ -415,8 +415,8 @@ Room.prototype.cornerVert = function(room, corner) {
       }
 
       if (checkAdjacentVert(vert) && checkAdjacentHoriz(horiz)) {
-           addPath(vert);
-           addPath(horiz);
+           game.addPath(vert);
+           game.addPath(horiz);
 
       }
       else {
@@ -493,8 +493,8 @@ Room.prototype.cornerHoriz = function(room, corner) {
           };
       }
       if (checkAdjacentVert(vert) && checkAdjacentHoriz(horiz)) {
-           addPath(vert);
-           addPath(horiz);
+           game.addPath(vert);
+           game.addPath(horiz);
       }
       else {
          console.log('[cornerHoriz] there is another path right next to this one for ' + this.id + ' and ' + room.id);
@@ -531,6 +531,7 @@ Room.prototype.connectDirect = function(room, tolerance) {
    let limit = 1;
    if (this.overlapsHoriz(room, tolerance)) {
 
+        // check for aligned rooms
         if (Math.abs(this.start.x - room.start.x) < limit ||
             Math.abs(this.end.x - room.end.x) < limit) {
      
@@ -573,7 +574,7 @@ Room.prototype.connectDirect = function(room, tolerance) {
          }
 
        if (found) {
-          addPath(path, this.id);
+          game.addPath(path, this.id);
        }
        else {
           removeNeighbors(this,room);
@@ -585,8 +586,6 @@ Room.prototype.connectDirect = function(room, tolerance) {
 
        if (Math.abs(this.start.y - room.start.y) < limit ||
             Math.abs(this.end.y - room.end.y) < limit) {
-
-           console.log(this.id + ' and ' + room.id + ' are vert aligned');
 
            doorLine.start.y = doorLine.end.y = this.center.y;
         }
@@ -623,7 +622,7 @@ Room.prototype.connectDirect = function(room, tolerance) {
          }
        }
        if (found) {
-         addPath(path, this.id);
+         game.addPath(path, this.id);
        }
        else {
          removeNeighbors(this,room);
