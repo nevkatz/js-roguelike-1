@@ -215,7 +215,7 @@ function startGame() {
        generateEnemies(TOTAL_ENEMIES);
       drawMap(0, 0, COLS, ROWS);
       updateStats();
-     // labelRooms();
+       labelRooms();
    }
 
 }
@@ -387,7 +387,6 @@ function generateMapRooms() {
 
    // let myRooms = game.rooms.filter(x => x.neighbors.length == 0);
     for (var room of game.rooms) {
-
 
       let success = room.findFacingRooms();
 

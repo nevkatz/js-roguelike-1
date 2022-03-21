@@ -6,12 +6,14 @@ class Path {
 
 		this.end = points.end || {x:0,y:0};
 
+		this.allowed = false;
+
 	}
 }
 
 
 
-Path.prototype.checkAdjacentVert = function(testX) {
+Path.prototype.isAdjacentVert = function(testX) {
 
    let score = 0;
    let limit = 5;
@@ -25,10 +27,10 @@ Path.prototype.checkAdjacentVert = function(testX) {
 
          score++;
    }
-   return score < limit;
+   return score >= limit;
 }
 
-Path.prototype.checkAdjacentHoriz = function(testY) {
+Path.prototype.isAdjacentHoriz = function(testY) {
    let score = 0;
    let limit = 5;
 
@@ -40,5 +42,6 @@ Path.prototype.checkAdjacentHoriz = function(testY) {
          
          score++;
    }
-   return score < limit;
+   console.log('score at '+y+': ' + score);
+   return score >= limit;
 }
