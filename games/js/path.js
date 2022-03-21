@@ -22,8 +22,8 @@ Path.prototype.isAdjacentVert = function(testX,type) {
 
    for (var y = this.start.y; y <= this.end.y; ++y) {
 
-         if (game.map[y][x-1] == FLOOR_CODE ||
-             game.map[y][x+1] == FLOOR_CODE)
+         if (game.map[y][x-1] != WALL_CODE ||
+             game.map[y][x+1] != WALL_CODE)
 
          score++;
    }
@@ -38,8 +38,8 @@ Path.prototype.isAdjacentHoriz = function(testY,type) {
    let y = testY || this.start.y;
 
    for (var x = this.start.x; x <= this.end.x; ++x) {
-         if ((game.map[y-1] && game.map[y-1][x] == FLOOR_CODE) ||
-             (game.map[y+1] && game.map[y+1][x] == FLOOR_CODE))
+         if ((game.map[y-1] && game.map[y-1][x] != WALL_CODE) ||
+             (game.map[y+1] && game.map[y+1][x] != WALL_CODE))
          
          score++;
    }
