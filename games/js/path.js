@@ -13,7 +13,7 @@ class Path {
 
 
 
-Path.prototype.isAdjacentVert = function(testX) {
+Path.prototype.isAdjacentVert = function(testX,type) {
 
    let score = 0;
    let limit = 5;
@@ -27,10 +27,11 @@ Path.prototype.isAdjacentVert = function(testX) {
 
          score++;
    }
+    console.log('adjacent vert score at '+x+': ' + score + ' type: ' + type);
    return score >= limit;
 }
 
-Path.prototype.isAdjacentHoriz = function(testY) {
+Path.prototype.isAdjacentHoriz = function(testY,type) {
    let score = 0;
    let limit = 5;
 
@@ -42,6 +43,6 @@ Path.prototype.isAdjacentHoriz = function(testY) {
          
          score++;
    }
-   console.log('score at '+y+': ' + score);
+   console.log('adjacent horiz score at '+y+': ' + score + ' type: ' + type + ' start: ' + this.start.x + ' end: ' + this.end.x);
    return score >= limit;
 }
