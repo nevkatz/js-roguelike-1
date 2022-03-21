@@ -50,9 +50,8 @@ function init() {
    game.canvas = document.getElementById("grid");
    game.context = game.canvas.getContext("2d");
 
- //  generateMapRooms();
    
-   testOverlapRight();
+   testNonOverlap();
 
 
 
@@ -64,7 +63,9 @@ function labelRooms() {
    game.context.font = '15px Arial';
    game.rooms.forEach(function(room) {
 
-      let txt = `r${room.id} (${room.start.x},${room.start.y})`;
+     // let txt = `r${room.id} (${room.start.x},${room.start.y})`;
+
+     let txt = `start: (${room.start.x},${room.start.y})`;
 
       let x = (room.start.x+1)*TILE_DIM;
   
@@ -75,6 +76,28 @@ function labelRooms() {
       y+= 2*TILE_DIM;
 
        let end= `end: (${room.end.x},${room.end.y})`;
+
+
+      game.context.fillText(end,x,y);
+   });
+}
+function labelRoomsX() {
+   game.context.fillStyle ='black';
+   game.context.font = '15px Arial';
+   game.rooms.forEach(function(room) {
+
+    
+      let txt = `start X: ${room.start.x}`;
+
+      let x = (room.start.x+1)*TILE_DIM;
+  
+      let y = room.center.y*TILE_DIM;
+      
+      game.context.fillText(txt, x, y);
+
+      y+= 2*TILE_DIM;
+
+       let end= `end X: ${room.end.x}`;
 
 
       game.context.fillText(end,x,y);
@@ -101,13 +124,13 @@ function resetMap() {
  */
 function genDim() {
    const BASE_DIM = 6;
-   const EXTRA = 1;
+   const EXTRA = 3;
 
    let width, height;
 
    width = height = BASE_DIM;
 
-   let additional = 1; //Math.round(Math.random() * EXTRA);
+   let additional = EXTRA; //Math.round(Math.random() * EXTRA);
 
    //let type = (Math.random() < 0.5) ? 'tall' : 'wide';
 

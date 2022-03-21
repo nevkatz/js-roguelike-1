@@ -171,6 +171,33 @@ function testOverlapRight() {
   // drawBox(22,17,3,27,'#03c04a',6);
 
 }
+function testNonOverlap() {
+   resetMap();
+
+   let r1 = {
+      x:18,
+      y:20
+   };
+
+   let r2 = {
+      x:27,
+      y:28
+   };
+
+
+   addRoom(r1);
+   addRoom(r2);
+   connectBasic(0);
+
+   drawMap(0, 0, COLS, ROWS);
+   
+   labelRoomsX();
+
+  // drawBox(22,24,3,13,'#03c04a',6);
+
+  // drawBox(22,17,3,27,'#03c04a',6);
+
+}
 /**
  * Two rooms facing each other
  */ 
