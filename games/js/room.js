@@ -382,9 +382,11 @@ Room.prototype.cornerVert = function(room, corner) {
           vert.end = {x:this.center.x, y:this.start.y};
       }
 
+      let tileCode = DEBUG ? WEAPON_CODE : FLOOR_CODE;
+
       if (!vert.isAdjacentVert(null, 'corner') && !horiz.isAdjacentHoriz(null,'corner')) {
-           game.addPath(vert,null,null,WEAPON_CODE);
-           game.addPath(horiz,null,null,WEAPON_CODE);
+           game.addPath(vert,null, null, tileCode);
+           game.addPath(horiz,null, null, tileCode);
       }
       else {
           console.log('[cornerVert] there is another path right next to this one for ' + this.id + ' and ' + room.id);
@@ -459,9 +461,13 @@ Room.prototype.cornerHoriz = function(room, corner) {
             end:corner
           });
       }
+
       if (!vert.isAdjacentVert(null, 'corner') && !horiz.isAdjacentHoriz(null, 'corner')) {
-           game.addPath(vert,null,null,WEAPON_CODE);
-           game.addPath(horiz,null,null,WEAPON_CODE);
+
+           let tileCode = DEBUG ? WEAPON_CODE : FLOOR_CODE;
+
+           game.addPath(vert, null, null, tileCode);
+           game.addPath(horiz, null, null, tileCode);
       }
       else {
          console.log('[cornerHoriz] there is another path right next to this one for ' + this.id + ' and ' + room.id);
@@ -558,12 +564,16 @@ Room.prototype.addVertPath = function(room, path, wall) {
 
    path.end.y = Math.max(this.start.y,room.start.y);
 
+   let tileCode = FLOOR_CODE;
+
    // this could be taken out if we want to simplify the tutorial.
    if (room.contains(this.center.x,'x',wall) && !path.isAdjacentVert(this.center.x)) {
      
            path.start.x = path.end.x = this.center.x;
 
            path.allowed = true;
+
+           if (DEBUG) { tileCode = PLAYER_CODE; }
    }
    else {
            path = this.placeDoorX(room,path,wall);
@@ -572,7 +582,7 @@ Room.prototype.addVertPath = function(room, path, wall) {
    if (path.allowed) {
          // console.log('Room '+this.id+' starty : ' + path.start.y + ' end y: ' + path.end.y);
 
-          game.addPath(path, this.id, 'addVertPath');
+          game.addPath(path, this.id, 'addVertPath',tileCode);
    }
    else {
 
@@ -592,12 +602,16 @@ Room.prototype.addHorizPath = function(room, path, wall) {
    // use the left side of whatever room is on the right
    path.end.x = Math.max(this.start.x,room.start.x);
 
+   let tileCode = FLOOR_CODE;
+
    // choose on center....
    if (room.contains(this.center.y,'y',wall) && !path.isAdjacentHoriz(this.center.y)) {
      
            path.start.y = path.end.y = this.center.y;
 
            path.allowed = true;
+
+          if (DEBUG) { tileCode = POTION_CODE };
 
    }
    else {
@@ -607,7 +621,7 @@ Room.prototype.addHorizPath = function(room, path, wall) {
    if (path.allowed) {
           // use the right of whatever room is on the left
 
-          game.addPath(path, this.id, 'addHorizPath');
+          game.addPath(path, this.id, 'addHorizPath', tileCode);
    }
    else {
 
@@ -624,7 +638,6 @@ Room.prototype.connectDirect = function(room, tolerance) {
  // convert tolerance to a wall value
  let wall = 1;
 
- console.log('wall: ' + wall);
 
  if (this.overlapsHoriz(room, tolerance)) {
       path = this.addVertPath(room,path,wall);

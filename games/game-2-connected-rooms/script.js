@@ -2,6 +2,8 @@
  *  Game Constants
  * 
  */ 
+const DEBUG = false;
+
 const OUTER_LIMIT = 3;
 
 const SHADOW_CODE = 0;
