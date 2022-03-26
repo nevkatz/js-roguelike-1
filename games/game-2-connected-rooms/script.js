@@ -346,7 +346,7 @@ function addRoom(c) {
    for (var gameRoom of game.rooms) {
 
       if (room.overlaps(gameRoom, 1)) {
-         return false;
+         return null;
       }
 
    }
@@ -357,7 +357,7 @@ function addRoom(c) {
    room.fillMap();
 
    game.rooms.push(room);
-   return true;
+   return room;
 
 }
 

@@ -4,6 +4,8 @@
  * Constants
  */ 
 
+const DEBUG = false;
+
 const COLS = 80;
 const ROWS = 60;
 
@@ -51,7 +53,7 @@ function init() {
    game.context = game.canvas.getContext("2d");
 
    
-   testNonOverlap();
+   testCornerHoriz();
 
 
 
@@ -214,7 +216,7 @@ function addRoom(c) {
    for (var gameRoom of game.rooms) {
 
       if (room.overlaps(gameRoom, 1)) {
-         return false;
+         return null;
       }
 
    }
@@ -225,7 +227,7 @@ function addRoom(c) {
    room.fillMap();
 
    game.rooms.push(room);
-   return true;
+   return room;
 
 }
 

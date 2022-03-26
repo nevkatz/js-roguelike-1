@@ -2,7 +2,7 @@
 /**
  * Two rooms stacked
  */ 
-function testOne() {
+function toVertAligned() {
    resetMap();
 
    let r1 = {
@@ -25,7 +25,7 @@ function testOne() {
 /**
  * Four rooms in plus-sign formation
  */ 
-function testTwo() {
+function threeVertAligned() {
 
    let diff = { 
       x:10,
@@ -69,7 +69,7 @@ function testTwo() {
 /**
  * Four rooms in plus-sign formation
  */ 
-function testThree() {
+function fourFacingRooms() {
 
    let diff = { 
       x:14,
@@ -201,7 +201,7 @@ function testNonOverlap() {
 /**
  * Two rooms facing each other
  */ 
-function testFive() {
+function showVertOverlap() {
    resetMap();
 
    let r1 = {
@@ -228,7 +228,31 @@ function testFive() {
    drawBox(22,27,3,17,'#03c04a',4);
 
 }
-function testSix() {
+function vertFacing() {
+   resetMap();
+
+   let r1 = {
+      x:20,
+      y:30
+   };
+
+   let r2 = {
+      x:23,
+      y:40
+   };
+
+
+   addRoom(r1);
+   addRoom(r2);
+   connectBasic(-1);
+
+   drawMap(0, 0, COLS, ROWS);
+
+
+}
+// possible solve by moving the corners.
+function cornerEdgeCase() {
+
    resetMap();
 
    let r1 = {
@@ -248,52 +272,70 @@ function testSix() {
 
    drawMap(0, 0, COLS, ROWS);
    
-   //labelRooms();
 
-  // drawBox(22,24,3,13,'#03c04a',6);
-
-  // drawBox(22,27,3,17,'#03c04a',4);
 
 }
 
-function testSix() {
+function testCornerVert() {
    resetMap();
 
-   let r1 = {
-      x:20,
+   let main = {
+      x:30,
       y:30
    };
 
-   let r2 = {
+   let topLeft = {
       x:10,
       y:20
    };
 
-     let r3 = {
+     let botLeft = {
       x:10,
-      y:20
+      y:40
    };
 
 
-   addRoom(r1);
-   addRoom(r2);
-   addRoom(r3);
-    for (var room of game.rooms) {
+   let mainRoom = addRoom(main);
+   let tlRoom = addRoom(topLeft);
+   let blRoom = addRoom(botLeft);
 
-      let success = null;
-      let neighbor = room.nearestNeighbor();
-      if (neighbor) {
-         success = room.connectRoom(neighbor);
-      }
-   }
+   mainRoom.connectRoom(tlRoom);
+   mainRoom.connectRoom(blRoom);
 
    drawMap(0, 0, COLS, ROWS);
-   
-   //labelRooms();
-
-  // drawBox(22,24,3,13,'#03c04a',6);
-
-  // drawBox(22,27,3,17,'#03c04a',4);
 
 }
+
+
+
+function testCornerHoriz() {
+   resetMap();
+
+   let main = {
+      x:50,
+      y:30
+   };
+
+   let topRight = {
+      x:60,
+      y:20
+   };
+
+   let botLeft = {
+      x:36,
+      y:40
+   };
+
+
+   let mainRoom = addRoom(main);
+   let trRoom = addRoom(topRight);
+   let blRoom = addRoom(botLeft);
+
+   mainRoom.connectRoom(trRoom);
+   mainRoom.connectRoom(blRoom);
+
+   drawMap(0, 0, COLS, ROWS);
+
+}
+
 
