@@ -255,3 +255,45 @@ function testSix() {
   // drawBox(22,27,3,17,'#03c04a',4);
 
 }
+
+function testSix() {
+   resetMap();
+
+   let r1 = {
+      x:20,
+      y:30
+   };
+
+   let r2 = {
+      x:10,
+      y:20
+   };
+
+     let r3 = {
+      x:10,
+      y:20
+   };
+
+
+   addRoom(r1);
+   addRoom(r2);
+   addRoom(r3);
+    for (var room of game.rooms) {
+
+      let success = null;
+      let neighbor = room.nearestNeighbor();
+      if (neighbor) {
+         success = room.connectRoom(neighbor);
+      }
+   }
+
+   drawMap(0, 0, COLS, ROWS);
+   
+   //labelRooms();
+
+  // drawBox(22,24,3,13,'#03c04a',6);
+
+  // drawBox(22,27,3,17,'#03c04a',4);
+
+}
+

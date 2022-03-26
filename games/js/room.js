@@ -295,18 +295,16 @@ Room.prototype.roomBetween = function(room) {
 Room.prototype.connectRoom = function(room, tolerance=-2) {
 
    let success = false;
+
    this.neighbors.push(room);
-
    room.neighbors.push(this);
-
-   //console.log('connectRoom with tolerance: ' + tolerance);
 
    if (this.overlapsHoriz(room, tolerance) || this.overlapsVert(room,tolerance)) {
 
-     
       success = this.connectDirect(room, tolerance);
    }
-   else {
+   
+   if (!success) {
       // if we add doorLine logic we need to mix in the inRoom
       // so it can'b be adjacent and it can't be in a room.
       let vertCorner = {x:this.center.x,y:room.center.y};
@@ -633,16 +631,12 @@ Room.prototype.connectDirect = function(room, tolerance) {
 
 
  if (this.overlapsHoriz(room, tolerance)) {
-      path = this.addVertPath(room,path,wall);
-     
+      path = this.addVertPath(room,path,wall);  
  }
  else {
       path = this.addHorizPath(room,path,wall);
  }
 
-// console.log('path allowed: ' + path.allowed);
- //console.log(path);
-// console.log(game.map);
   return path.allowed;
 }
 Room.prototype.findPotentialRooms = function() {

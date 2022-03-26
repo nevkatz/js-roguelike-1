@@ -15,8 +15,7 @@ class Path {
 
 Path.prototype.isAdjacentVert = function(testX,type) {
 
-   let score = 0;
-   let limit = 5;
+   let score = 0, limit = 5;
 
    let x = testX || this.start.x;
 
@@ -35,9 +34,6 @@ Path.prototype.isAdjacentVert = function(testX,type) {
          else {
             score = 0;
          }
-
-
-       
    }
     console.log('adjacent vert score at '+x+': ' + score + ' type: ' + type);
    return false;

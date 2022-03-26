@@ -50,9 +50,7 @@ Game.prototype.inRoom = function({x,y}) {
 }
 
 Game.prototype.addPath = function(path, id, src, tileCode) {
-   console.log('adding path. src: ' + src);
-   console.log(path);
-
+ 
    for (var y = path.start.y; y <= path.end.y; ++y) {
       for (var x = path.start.x; x <= path.end.x; ++x) {
          game.map[y][x] = tileCode || FLOOR_CODE;
