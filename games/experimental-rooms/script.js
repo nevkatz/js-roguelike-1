@@ -140,7 +140,7 @@ function checkAdjacentHoriz(path, testY) {
    return score < limit;
 }
 
-function addPath(path, id) {
+function game.addPath(path, id) {
 
    for (var y = path.start.y; y <= path.end.y; ++y) {
       for (var x = path.start.x; x <= path.end.x; ++x) {

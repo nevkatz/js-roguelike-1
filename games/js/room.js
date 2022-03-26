@@ -23,7 +23,7 @@ class Room {
 Room.prototype.overlapsHoriz = function(room, tolerance=0) {
 
    return this.start.x - tolerance <= room.end.x &&
-           this.end.x + tolerance >=  room.start.x;
+           this.end.x + tolerance >= room.start.x;
 }
 Room.prototype.overlapsLeft = function(room, tolerance=0) {
 
@@ -164,7 +164,7 @@ Room.prototype.findFacingRooms = function(tolerance=0, maxRooms=1) {
    for (var room of rooms) {
 
       if ((this.overlapsHoriz(room,tolerance) && !this.roomBetween(room)) ||
-         //let dist = this.vertDist(room);
+
           (this.overlapsVert(room, tolerance) && !this.roomBetween(room))) {
 
 
@@ -173,7 +173,7 @@ Room.prototype.findFacingRooms = function(tolerance=0, maxRooms=1) {
          //neighbors.horiz.push({room,dist});
 
       }
-      if (this.neighbors.length > maxRooms) {
+      if (this.neighbors.length >= maxRooms) {
 
          break;
       }
@@ -284,7 +284,9 @@ Room.prototype.roomBetween = function(room) {
    let testRooms = game.rooms.filter(x => x.id != this.id && x.id != room.id);
    for (var testRoom of testRooms) {
 
-      if (testRoom.betweenVert(this,room) || testRoom.betweenHoriz(this,room)) {
+      if (testRoom.betweenVert(this,room) || 
+          testRoom.betweenHoriz(this,room)) {
+
          return true;
       }
    } 
@@ -340,7 +342,7 @@ Room.prototype.cornerVert = function(room, corner) {
 
          horiz.start = corner;
 
-         horiz.end = {x:room.start.x,y:room.center.y};
+         horiz.end = {x:room.start.x - 1, y:room.center.y};
  
       }
       /**  
@@ -353,7 +355,7 @@ Room.prototype.cornerVert = function(room, corner) {
        */
       if (this.onRight(room)) {
 
-           horiz.start = {x:room.end.x, y:room.center.y};
+           horiz.start = {x:room.end.x + 1, y:room.center.y};
            horiz.end = corner;
      
       }
@@ -364,7 +366,7 @@ Room.prototype.cornerVert = function(room, corner) {
        *      *---room
        */ 
       if (this.above(room)) {
-           vert.start = {x:this.center.x, y:this.end.y};
+           vert.start = {x:this.center.x, y:this.end.y + 1};
              // end at top center of other room
            vert.end = corner;
       }
@@ -379,7 +381,7 @@ Room.prototype.cornerVert = function(room, corner) {
       if (this.below(room))  {
           vert.start = corner;
 
-          vert.end = {x:this.center.x, y:this.start.y};
+          vert.end = {x:this.center.x, y:this.start.y - 1};
       }
 
       let tileCode = DEBUG ? WEAPON_CODE : FLOOR_CODE;
@@ -406,20 +408,18 @@ Room.prototype.cornerHoriz = function(room, corner) {
    console.log(`room${this.id} is using cornerHoriz to connect with room${room.id}`);
    // assumes branches go out from sides.
 
-   let horiz = null, vert = null;
+   let horiz = new Path(), vert = new Path;
    
       /**  
-       *  this   ----*
-       *             |
-       *             |
-       *            room
+       *  this  ----*
+       *            |
+       *            |
+       *          room
        */
       if (this.onLeft(room)) {
-           horiz = new Path({ 
-             start:{x:this.end.x, y:this.center.y},
-             end:corner,
-            });
-      };
+         horiz.start = {x:this.end.x + 1,y:this.center.y},
+         horiz.end = corner
+      }
       /**
        *  *--- this (onRight)
        *  |
@@ -427,12 +427,9 @@ Room.prototype.cornerHoriz = function(room, corner) {
        * room
        */
       if (this.onRight(room)) {
-         horiz = new Path({
-            // start at corner
-            start:corner,
-            // and on left of this 
-            end:{x:this.start.x,y:this.center.y}
-         });
+         horiz.start  = corner,
+         horiz.end = {x:this.start.x - 1,y:this.center.y}
+ 
       }
       /**
        *    this---*
@@ -441,12 +438,10 @@ Room.prototype.cornerHoriz = function(room, corner) {
        * 
        */ 
       if (this.above(room)) {
-           vert = new Path({
-             // start at corner, go down
-             start:corner,
+           vert.start = corner,
              // end at top center of other room
-             end:{x:room.center.x, y:room.start.y}
-           });
+           vert.end = {x:room.center.x, y:room.start.y - 1}
+    
       }
       /*
 
@@ -456,10 +451,8 @@ Room.prototype.cornerHoriz = function(room, corner) {
       *----this        this----*
        */
       if (this.below(room)) {
-          vert = new Path({
-            start:{x:room.center.x, y:room.end.y},
-            end:corner
-          });
+          vert.start = {x:room.center.x, y:room.end.y + 1},
+          vert.end = corner
       }
 
       if (!vert.isAdjacentVert(null, 'corner') && !horiz.isAdjacentHoriz(null, 'corner')) {
@@ -559,10 +552,10 @@ Room.prototype.placeDoorY = function(room,path,wall) {
 Room.prototype.addVertPath = function(room, path, wall) {
 
        // use the bottom of whatever room is above
-   path.start.y = Math.min(this.end.y,room.end.y);
+   path.start.y = Math.min(this.end.y,room.end.y) + 1;
           // use the top of whatever room is below.
 
-   path.end.y = Math.max(this.start.y,room.start.y);
+   path.end.y = Math.max(this.start.y,room.start.y) - 1;
 
    let tileCode = FLOOR_CODE;
 
@@ -597,10 +590,10 @@ Room.prototype.addHorizPath = function(room, path, wall) {
    // this could be taken out if we want to simplify the tutorial.
    // we can add this in a different article on prioritizing center doors.
 
-   path.start.x = Math.min(this.end.x,room.end.x);
+   path.start.x = Math.min(this.end.x,room.end.x) + 1;
 
    // use the left side of whatever room is on the right
-   path.end.x = Math.max(this.start.x,room.start.x);
+   path.end.x = Math.max(this.start.x,room.start.x) - 1;
 
    let tileCode = FLOOR_CODE;
 

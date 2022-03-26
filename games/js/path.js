@@ -23,12 +23,24 @@ Path.prototype.isAdjacentVert = function(testX,type) {
    for (var y = this.start.y; y <= this.end.y; ++y) {
 
          if (game.map[y][x-1] != WALL_CODE ||
-             game.map[y][x+1] != WALL_CODE)
+             game.map[y][x+1] != WALL_CODE) {
 
-         score++;
+            score++;
+            
+            if (score == limit) {
+               return true;
+            }
+
+         }
+         else {
+            score = 0;
+         }
+
+
+       
    }
     console.log('adjacent vert score at '+x+': ' + score + ' type: ' + type);
-   return score >= limit;
+   return false;
 }
 
 Path.prototype.isAdjacentHoriz = function(testY,type) {
@@ -39,10 +51,16 @@ Path.prototype.isAdjacentHoriz = function(testY,type) {
 
    for (var x = this.start.x; x <= this.end.x; ++x) {
          if ((game.map[y-1] && game.map[y-1][x] != WALL_CODE) ||
-             (game.map[y+1] && game.map[y+1][x] != WALL_CODE))
-         
-         score++;
+             (game.map[y+1] && game.map[y+1][x] != WALL_CODE)) {
+                
+                score++;
+
+                if (score == limit) { return true; }
+         }
+         else {
+            score = 0;
+         }
    }
    console.log('adjacent horiz score at '+y+': ' + score + ' type: ' + type + ' start: ' + this.start.x + ' end: ' + this.end.x);
-   return score >= limit;
+   return false;
 }

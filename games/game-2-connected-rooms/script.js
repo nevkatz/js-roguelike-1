@@ -2,7 +2,7 @@
  *  Game Constants
  * 
  */ 
-const DEBUG = false;
+const DEBUG = true;
 
 const OUTER_LIMIT = 3;
 
@@ -21,7 +21,7 @@ const POTIONS = [10, 20, 30, 40, 50];
 // possible health that enemies can have
 const ENEMIES_HEALTH = [30, 30, 30, 30, 40, 40, 60, 80];
 
-// possible damage that enemies can inflict
+// possible damage thatxenemies can inflict
 const ENEMIES_DAMAGE = [30, 30, 30, 30, 40, 40, 60, 80];
 
 const POINTS_PER_LEVEL = 100;
