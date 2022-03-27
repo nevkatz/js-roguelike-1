@@ -25,6 +25,38 @@ Room.prototype.overlapsHoriz = function(room, tolerance=0) {
    return this.start.x - tolerance <= room.end.x &&
            this.end.x + tolerance >= room.start.x;
 }
+Room.prototype.sharesX = function(room, minTiles=1) {
+
+ /** start
+  *  |
+  *  *------*             *------*
+  *  | room |             | room |
+  *  *------* <-- end     *------*
+  *    s       e
+  *    *-------*
+  *    |  this |
+  *    *-------*
+  */ 
+   return  room.end.x - this.start.x >= minTiles &&
+           this.end.x - room.start.x >= minTiles;
+}
+Room.prototype.sharesCoordsWith = function(room, coord, minCoords=1) {
+
+ /** start
+  *  |
+  *  *------*             *------*
+  *  | room |             | room |
+  *  *------* <-- end     *------*
+  *    s       e
+  *    *-------*
+  *    |  this |
+  *    *-------*
+  * The difference between roomA end and room B end needs to be greater than minTiles
+  * 
+  */ 
+   return  room.end[cord] - this.start[cord] >= minCoords &&
+           this.end[cord] - room.start[cord] >= minCoords;
+}
 Room.prototype.overlapsLeft = function(room, tolerance=0) {
 
    return this.overlapsHoriz && this.center.x <= room.center.x;
@@ -300,7 +332,8 @@ Room.prototype.connectRoom = function(room, tolerance=-2) {
 
    let success = false;
 
-   if (this.overlapsHoriz(room, tolerance) || this.overlapsVert(room,tolerance)) {
+   if (this.overlapsHoriz(room, tolerance) || 
+       this.overlapsVert(room,tolerance)) {
 
       success = this.directConnect(room, tolerance);
 
