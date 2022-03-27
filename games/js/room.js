@@ -158,8 +158,9 @@ Room.prototype.isAdjacent = function(room) {
 Room.prototype.findFacingRooms = function(tolerance=0, maxRooms=1) {
 
   // console.log(`Room${this.id} findFacing with tolerance ` + tolerance);
-   let rooms = this.findPotentialRooms();
    let success = false;
+   
+   let rooms = this.findPotentialRooms();
 
    for (var room of rooms) {
 
@@ -167,14 +168,11 @@ Room.prototype.findFacingRooms = function(tolerance=0, maxRooms=1) {
 
           (this.overlapsVert(room, tolerance) && !this.roomBetween(room))) {
 
+         success = this.connectRoom(room, tolerance);
 
-         this.connectRoom(room, tolerance);
-         successs = true;
-         //neighbors.horiz.push({room,dist});
-
+      console.log('success: ' + success);
       }
       if (this.neighbors.length >= maxRooms) {
-
          break;
       }
    }
@@ -238,10 +236,9 @@ Room.prototype.fillMap = function() {
 }
 
 
-Room.prototype.contains = function(x, prop, buffer=0) {
-   return x >= this.start[prop] + buffer && x <= this.end[prop] - buffer;
+Room.prototype.contains = function(c, prop) {
+   return c >= this.start[prop] && c <= this.end[prop];
 }
-
 Room.prototype.encloses = function(x,y) {
    return this.contains(x,'x') && this.contains(y,'y');
 }
@@ -264,18 +261,21 @@ Room.prototype.onRight = function(room) {
 
 Room.prototype.betweenHoriz = function(room1,room2) {
 
-   let b = this.overlapsVert(room1) && this.overlapsVert(room2) &&
-          ((this.center.x < room1.center.x && this.center.x > room2.center.x) ||
-          (this.center.x < room2.center.x && this.center.x > room1.center.x));
+  return this.overlapsVert(room1) && 
+           this.overlapsVert(room2) &&
+           room1.overlapsVert(room2) &&
+          ((this.center.x > room1.center.x && this.center.x < room2.center.x) ||
+          (this.center.x > room2.center.x && this.center.x < room1.center.x));
 
 
-   return b;
 }
 Room.prototype.betweenVert = function(room1,room2) {
 
-   let b = this.overlapsHoriz(room1) && this.overlapsHoriz(room2) &&
-         ((this.center.y < room1.center.y && this.center.y > room2.center.y) ||
-          (this.center.y < room2.center.y && this.center.y > room1.center.y));
+   let b = this.overlapsHoriz(room1) && 
+           this.overlapsHoriz(room2) &&
+           room1.overlapsVert(room2) &&
+         ((this.center.y > room1.center.y && this.center.y < room2.center.y) ||
+          (this.center.y > room2.center.y && this.center.y < room1.center.y));
 
    return b;
 
@@ -294,14 +294,16 @@ Room.prototype.roomBetween = function(room) {
 }
 Room.prototype.connectRoom = function(room, tolerance=-2) {
 
-   let success = false;
-
    this.neighbors.push(room);
    room.neighbors.push(this);
 
+   let success = false;
+
    if (this.overlapsHoriz(room, tolerance) || this.overlapsVert(room,tolerance)) {
 
-      success = this.connectDirect(room, tolerance);
+      success = this.directConnect(room, tolerance);
+
+      console.log('success in connectRoom: ' + success);
    }
    
    if (!success) {
@@ -311,10 +313,12 @@ Room.prototype.connectRoom = function(room, tolerance=-2) {
 
       let horizCorner = {x:room.center.x, y:this.center.y};
 
-      if (!game.inRoom(vertCorner)) {
+      let vert = Math.random() < 0.5;
+
+      if ((vert || game.inRoom(horizCorner)) && !game.inRoom(vertCorner)) {
          success = this.cornerVert(room, vertCorner);
       }
-      else if (!game.inRoom(horizCorner)) {
+      if (!success && !game.inRoom(horizCorner)) {
          success = this.cornerHoriz(room, horizCorner);
       }
       else {
@@ -382,7 +386,7 @@ Room.prototype.cornerVert = function(room, corner) {
           vert.end = {x:this.center.x, y:this.start.y - 1};
       }
 
-      let tileCode = DEBUG ? WEAPON_CODE : FLOOR_CODE;
+      let tileCode = DEBUG ? ITEM_CODE : FLOOR_CODE;
 
       if (!vert.isAdjacentVert(null, 'corner') && !horiz.isAdjacentHoriz(null,'corner')) {
            game.addPath(vert,null, null, tileCode);
@@ -455,7 +459,7 @@ Room.prototype.cornerHoriz = function(room, corner) {
 
       if (!vert.isAdjacentVert(null, 'corner') && !horiz.isAdjacentHoriz(null, 'corner')) {
 
-           let tileCode = DEBUG ? WEAPON_CODE : FLOOR_CODE;
+           let tileCode = DEBUG ? SPELL_CODE : FLOOR_CODE;
 
            game.addPath(vert, null, null, tileCode);
            game.addPath(horiz, null, null, tileCode);
@@ -524,7 +528,7 @@ Room.prototype.placeDoorX = function(room,path,wall) {
               console.log('Room'+this.id+' -- path is bad at '+x);
          }
    }
-   return doorLine;
+   return path;
 }
 Room.prototype.placeDoorY = function(room,path,wall) {
    
@@ -557,19 +561,8 @@ Room.prototype.addVertPath = function(room, path, wall) {
 
    let tileCode = FLOOR_CODE;
 
-   // this could be taken out if we want to simplify the tutorial.
-   if (room.contains(this.center.x,'x',wall) && !path.isAdjacentVert(this.center.x)) {
-     
-           path.start.x = path.end.x = this.center.x;
-
-           path.allowed = true;
-
-           if (DEBUG) { tileCode = PLAYER_CODE; }
-   }
-   else {
-           path = this.placeDoorX(room,path,wall);
-   }   
-
+   path = this.placeDoorX(room,path,wall);
+ 
    if (path.allowed) {
          // console.log('Room '+this.id+' starty : ' + path.start.y + ' end y: ' + path.end.y);
 
@@ -595,19 +588,9 @@ Room.prototype.addHorizPath = function(room, path, wall) {
 
    let tileCode = FLOOR_CODE;
 
-   // choose on center....
-   if (room.contains(this.center.y,'y',wall) && !path.isAdjacentHoriz(this.center.y)) {
-     
-           path.start.y = path.end.y = this.center.y;
-
-           path.allowed = true;
-
-          if (DEBUG) { tileCode = POTION_CODE };
-
-   }
-   else {
-           path = this.placeDoorY(room,path,wall);
-   }   
+ 
+   path = this.placeDoorY(room,path,wall);
+  
 
    if (path.allowed) {
           // use the right of whatever room is on the left
@@ -622,18 +605,22 @@ Room.prototype.addHorizPath = function(room, path, wall) {
    return path;
 
 }
-Room.prototype.connectDirect = function(room, tolerance) {
+Room.prototype.directConnect = function(room, tolerance) {
 
  let path = new Path();
  
  // convert tolerance to a wall value
- let wall = 1;
+ let wall = -1*(tolerance/2);
+
+ console.log('** Wall: ' + wall);
 
 
  if (this.overlapsHoriz(room, tolerance)) {
+   console.log('trying vert');
       path = this.addVertPath(room,path,wall);  
  }
  else {
+   console.log('trying horiz');
       path = this.addHorizPath(room,path,wall);
  }
 
@@ -674,7 +661,6 @@ Room.prototype.findNearest = function(myRoom, rooms) {
 Room.prototype.findNearbyRoom = function(myRoom, rooms) {
    let shortest = null;
    let nearestRoom = null;
-
 
    for (var room of rooms) {
       

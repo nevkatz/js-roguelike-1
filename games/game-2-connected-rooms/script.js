@@ -16,6 +16,11 @@ const ENEMY_CODE = 3;
 const POTION_CODE = 4;
 const WEAPON_CODE = 5;
 
+const SPELL_CODE = 6;
+const ITEM_CODE = 7;
+const PATH_CODE = 8;
+const WARP_CODE = 9;
+
 const POTIONS = [10, 20, 30, 40, 50];
 
 // possible health that enemies can have
@@ -53,7 +58,15 @@ const TILE_COLORS = [
    // health drop
    'green',
    // weapon
-   'orange'
+   'orange',
+
+   'purple',
+
+   'pink',
+
+   'lightblue',
+
+   'lightgreen'
 ];
 
 
@@ -380,44 +393,23 @@ function generateMapRooms() {
 
    let maxRooms = 30;
 
-
    for (var i = 0; i < maxRooms; ++i) {
       addRoom();
    }
+   for (var room of game.rooms) {
 
-   
+      let success = room.findFacingRooms(-2);
 
-   // let myRooms = game.rooms.filter(x => x.neighbors.length == 0);
-    for (var room of game.rooms) {
-
-      let success = room.findFacingRooms();
-
+      // find facing or diagonal rooms
       let neighbor = room.nearestNeighbor();
  
       if (neighbor) {
          success = room.connectRoom(neighbor);
       }
-      console.log('success with finding nearest neighbor for '+room.id+': ' + success);
-     /* if (!success) {
-
-         let rooms = room.findOverlapping();
-
-
-         for (var newRoom of rooms) {
-
-            success = room.connectRoom(newRoom);
-
-            if (success) {
-               console.log(`last chance -- ${room.id} has connected with ${newRoom.id}`);
-               break;
-            }
-         }   
-    }*/
    }
    for (var room of game.rooms) {
      room.connectRemaining();
    }
-   printNeighbors();
 }
 
 function printNeighbors() {

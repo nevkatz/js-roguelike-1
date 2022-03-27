@@ -18,6 +18,8 @@ const WALL_CODE = 0;
 const FLOOR_CODE = 1;
 
 
+
+
 const TILE_DIM = 10;
 
 const TILE_COLORS = [
@@ -53,7 +55,7 @@ function init() {
    game.context = game.canvas.getContext("2d");
 
    
-   testCornerHoriz();
+   directConnectCorner();
 
 
 
@@ -77,11 +79,21 @@ function labelRooms() {
 
       y+= 2*TILE_DIM;
 
-       let end= `end: (${room.end.x},${room.end.y})`;
-
+      let end= `end: (${room.end.x},${room.end.y})`;
 
       game.context.fillText(end,x,y);
    });
+}
+function labelRoom(room, label, offset = 0, size=20) {
+   game.context.fillStyle ='black';
+   game.context.font = size + 'px Arial';
+
+   let x = (room.start.x+1+offset)*TILE_DIM;
+  
+   let y = (room.center.y+1)*TILE_DIM;
+      
+   game.context.fillText(label, x, y);
+
 }
 function labelRoomsX() {
    game.context.fillStyle ='black';
@@ -216,6 +228,7 @@ function addRoom(c) {
    for (var gameRoom of game.rooms) {
 
       if (room.overlaps(gameRoom, 1)) {
+         console.log('room overlaps');
          return null;
       }
 
@@ -296,6 +309,14 @@ function drawObject(x, y, color) {
    //  game.context.clearRect(x * 10, y * 10, 10, 10);
    game.context.beginPath();
    game.context.rect(x * TILE_DIM, y * TILE_DIM, TILE_DIM, TILE_DIM);
+   game.context.fillStyle = color;
+   game.context.fill();
+}
+function labelTile(x, y, color) {
+
+   //  game.context.clearRect(x * 10, y * 10, 10, 10);
+   game.context.beginPath();
+   game.context.rect(x * TILE_DIM+1, y * TILE_DIM+1, TILE_DIM-2, TILE_DIM-2);
    game.context.fillStyle = color;
    game.context.fill();
 }

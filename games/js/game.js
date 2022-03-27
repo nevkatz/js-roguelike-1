@@ -41,12 +41,10 @@ Game.prototype.inRoom = function({x,y}) {
    for (var room of this.rooms) {
 
       if (room.encloses(x,y)) {
-         inRoom = room.id;
-         break;
+         return room.id;
       }
    }
-   console.log(`in room test of (${x},${y}): ` + inRoom);
-   return inRoom;
+   return null;
 }
 
 Game.prototype.addPath = function(path, id, src, tileCode) {

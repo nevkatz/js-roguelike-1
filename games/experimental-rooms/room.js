@@ -57,15 +57,13 @@ Room.prototype.findFacingRooms = function() {
    let success = false;
    for (var room of rooms) {
 
-      console.log('found adjacent for ' + room.id);
       if ((this.overlapsHoriz(room,tolerance) && !this.roomBetween(this,room)) ||
          //let dist = this.vertDist(room);
           (this.overlapsVert(room, tolerance) && !this.roomBetween(this,room))) {
 
 
-         this.connectRoom(room);
-         successs = true;
-         //neighbors.horiz.push({room,dist});
+         success = this.connectRoom(room);
+       
 
       }
       if (this.neighbors.length > maxRooms) {
@@ -294,7 +292,9 @@ Room.prototype.onRight = function(room) {
 
 Room.prototype.betweenHoriz = function(room1,room2) {
 
-   let b = this.overlapsVert(room1) && this.overlapsVert(room2) &&
+   let b = this.overlapsVert(room1) && 
+           this.overlapsVert(room2) &&
+           room1.overlapsVert(room2) &&
           ((this.center.x < room1.center.x && this.center.x > room2.center.x) ||
           (this.center.x < room2.center.x && this.center.x > room1.center.x));
 
@@ -303,7 +303,10 @@ Room.prototype.betweenHoriz = function(room1,room2) {
    return b;
 }
 Room.prototype.betweenVert = function(room1,room2) {
-   let b = this.overlapsHoriz(room1) && this.overlapsHoriz(room2) &&
+   let b = this.overlapsHoriz(room1) && 
+           this.overlapsHoriz(room2) &&
+           room1.overlapsHoriz(room2) &&
+
          ((this.center.y < room1.center.y && this.center.y > room2.center.y) ||
           (this.center.y < room2.center.y && this.center.y > room1.center.y));
 
@@ -337,7 +340,7 @@ Room.prototype.connectRoom = function(room) {
 
      // console.log(`room${this.id} direct connecting with ${room.id}`);
      
-      success = this.connectDirect(room, tolerance);
+      success = this.directConnect(room, tolerance);
    }
    else {
       let vertCorner = {x:this.center.x,y:room.center.y};
@@ -503,7 +506,7 @@ Room.prototype.cornerHoriz = function(room, corner) {
       }
       return true;
 }
-Room.prototype.connectDirect = function(room, tolerance) {
+Room.prototype.directConnect = function(room, tolerance) {
 
 
    let found = false;
