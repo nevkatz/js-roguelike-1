@@ -95,7 +95,7 @@ Room.prototype.overlapsLeft = function(room, wall=0) {
 
  /**
   * 
-  * Here the doorLine of overlap is between other.start.x and this.end.x
+  * Here the doorTiles of overlap is between other.start.x and this.end.x
   * 
   * this.start.x
   *   |

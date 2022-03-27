@@ -124,7 +124,7 @@ Room.prototype.overlapsLeft = function(room, wall=0) {
 
  /**
   * 
-  * Here the doorLine of overlap is between other.start.x and this.end.x
+  * Here the doorTiles of overlap is between other.start.x and this.end.x
   * 
   * this.start.x
   *   |
@@ -510,7 +510,7 @@ Room.prototype.directConnect = function(room, tolerance) {
 
 
    let found = false;
- let doorLine = {
+ let doorTiles = {
       start:{
          x:0,
          y:0
@@ -539,16 +539,16 @@ Room.prototype.directConnect = function(room, tolerance) {
             Math.abs(this.end.x - room.end.x) < limit) {
      
 
-           doorLine.start.x = doorLine.end.x = this.center.x;
+           doorTiles.start.x = doorTiles.end.x = this.center.x;
         }
 
         else if(this.overlapsLeft(room)) {
-          doorLine.start.x = room.start.x;
-          doorLine.end.x = this.end.x;
+          doorTiles.start.x = room.start.x;
+          doorTiles.end.x = this.end.x;
         }
         else if (this.overlapsRight(room)) {
-          doorLine.start.x = this.start.x;
-          doorLine.end.x = room.end.x;
+          doorTiles.start.x = this.start.x;
+          doorTiles.end.x = room.end.x;
         }
         else {
          console.log('should have horiz overlap but none for ' + this.id);
@@ -569,7 +569,7 @@ Room.prototype.directConnect = function(room, tolerance) {
          console.log('no path available...');
        }
 
-         for (var x = doorLine.start.x; x <= doorLine.end.x; ++x) {
+         for (var x = doorTiles.start.x; x <= doorTiles.end.x; ++x) {
            if (room.contains(x, 'x') && this.contains(x, 'x') && checkAdjacentVert(path,x)) {
             found = true;
             path.start.x = path.end.x = x;
@@ -590,16 +590,16 @@ Room.prototype.directConnect = function(room, tolerance) {
        if (Math.abs(this.start.y - room.start.y) < limit ||
             Math.abs(this.end.y - room.end.y) < limit) {
 
-           doorLine.start.y = doorLine.end.y = this.center.y;
+           doorTiles.start.y = doorTiles.end.y = this.center.y;
         }
 
        else if (this.overlapsTop(room)) {
-          doorLine.start.y = room.start.y;
-          doorLine.end.y = this.end.y;
+          doorTiles.start.y = room.start.y;
+          doorTiles.end.y = this.end.y;
        }
        else if (this.overlapsBot(room)) {
-         doorLine.start.y = this.start.y;
-         doorLine.end.y = room.end.y;
+         doorTiles.start.y = this.start.y;
+         doorTiles.end.y = room.end.y;
        }
        else {
          console.log('should have vert overlap but none for ' + this.id);
@@ -618,7 +618,7 @@ Room.prototype.directConnect = function(room, tolerance) {
 
        // get a viable vertical position
 
-       for (var y = doorLine.start.y; y <= doorLine.end.y; ++y) {
+       for (var y = doorTiles.start.y; y <= doorTiles.end.y; ++y) {
          if (room.contains(y, 'y') && this.contains(y, 'y') && checkAdjacentHoriz(path,y)) {
             path.start.y = path.end.y = y;
             found = true;

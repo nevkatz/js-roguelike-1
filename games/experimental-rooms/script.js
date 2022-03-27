@@ -949,7 +949,7 @@ function generateShadow() {
    for (var row = 0; row < ROWS; row++) {
       game.shadow.push([]);
       for (var col = 0; col < COLS; col++) {
-         // if this falls within visible doorLine, push 1
+         // if this falls within visible doorTiles, push 1
          if (row >= start.y && row <= end.y && col >= start.x && col <= end.x) {
             game.shadow[row].push(VISIBLE_CODE);
             // else, push 0

@@ -53,7 +53,7 @@ Room.prototype.overlapsBot = function(room, tolerance=0) {
 
  /**
   * 
-  * Here the doorLine of overlap is between other.start.x and this.end.x
+  * Here the doorTiles of overlap is between other.start.x and this.end.x
   * 
   * This.start.x always has to be less than or equal to than room.end.x. 
   * Here, it counts as an overlap. 
@@ -292,10 +292,11 @@ Room.prototype.roomBetween = function(room) {
    } 
    return false;
 }
-Room.prototype.connectRoom = function(room, tolerance=-2) {
-
+Room.prototype.addNeighbor = function(room) {
    this.neighbors.push(room);
    room.neighbors.push(this);
+}
+Room.prototype.connectRoom = function(room, tolerance=-2) {
 
    let success = false;
 
@@ -303,11 +304,10 @@ Room.prototype.connectRoom = function(room, tolerance=-2) {
 
       success = this.directConnect(room, tolerance);
 
-      console.log('success in connectRoom: ' + success);
    }
    
    if (!success) {
-      // if we add doorLine logic we need to mix in the inRoom
+      // if we add doorTiles logic we need to mix in the inRoom
       // so it can'b be adjacent and it can't be in a room.
       let vertCorner = {x:this.center.x,y:room.center.y};
 
@@ -391,14 +391,11 @@ Room.prototype.cornerVert = function(room, corner) {
       if (!vert.isAdjacentVert(null, 'corner') && !horiz.isAdjacentHoriz(null,'corner')) {
            game.addPath(vert,null, null, tileCode);
            game.addPath(horiz,null, null, tileCode);
-      }
-      else {
-          console.log('[cornerVert] there is another path right next to this one for ' + this.id + ' and ' + room.id);
-          removeNeighbors(this,room);
-          return false;
+
+           this.addNeighbor(room);
       }
     
-  return true;
+  return this.neighbors.includes(room);
 }
 
 function removeNeighbors(room1,room2) {
@@ -463,13 +460,9 @@ Room.prototype.cornerHoriz = function(room, corner) {
 
            game.addPath(vert, null, null, tileCode);
            game.addPath(horiz, null, null, tileCode);
+           this.addNeighbor(room);
       }
-      else {
-         console.log('[cornerHoriz] there is another path right next to this one for ' + this.id + ' and ' + room.id);
-         removeNeighbors(this,room);
-          return false;
-      }
-      return true;
+      return this.neighbors.includes(room);
 }
 /**
  * @param {Object} room
@@ -499,23 +492,23 @@ Room.prototype.alignedEdges = function(room,axis) {
 Room.prototype.alignedCenters = function(room,axis) {
    return this.center[axis] == room.centers[axis];
 }
-Room.prototype.getDoorLine = function(room,axis,wall) {
-   let doorLine = new Path();
+Room.prototype.getdoorTiles = function(room,axis,wall) {
+   let doorTiles = new Path();
 
 
-   doorLine.start[axis] = Math.max(this.start[axis] + wall, room.start[axis] + wall);
+   doorTiles.start[axis] = Math.max(this.start[axis] + wall, room.start[axis] + wall);
 
-   doorLine.end[axis] = Math.min(this.end[axis] - wall, room.end[axis] - wall);
+   doorTiles.end[axis] = Math.min(this.end[axis] - wall, room.end[axis] - wall);
 
 
-   return doorLine;
+   return doorTiles;
 
 }
 Room.prototype.placeDoorX = function(room,path,wall) {
    
-   let doorLine = this.getDoorLine(room,'x',wall);
+   let doorTiles = this.getdoorTiles(room,'x',wall);
 
-   for (var x = doorLine.start.x; x <= doorLine.end.x; ++x) {
+   for (var x = doorTiles.start.x; x <= doorTiles.end.x; ++x) {
 
          // add inRoom logic for corners? 
          if (!path.isAdjacentVert(x)) {
@@ -532,9 +525,9 @@ Room.prototype.placeDoorX = function(room,path,wall) {
 }
 Room.prototype.placeDoorY = function(room,path,wall) {
    
-   let doorLine = this.getDoorLine(room,'y', wall);
+   let doorTiles = this.getdoorTiles(room,'y', wall);
 
-   for (var y = doorLine.start.y; y <= doorLine.end.y; ++y) {
+   for (var y = doorTiles.start.y; y <= doorTiles.end.y; ++y) {
 
          if (!path.isAdjacentHoriz(y)) {
               console.log('Room'+this.id+' -- path is good at '+y);
@@ -553,9 +546,7 @@ Room.prototype.placeDoorY = function(room,path,wall) {
 }
 Room.prototype.addVertPath = function(room, path, wall) {
 
-       // use the bottom of whatever room is above
    path.start.y = Math.min(this.end.y,room.end.y) + 1;
-          // use the top of whatever room is below.
 
    path.end.y = Math.max(this.start.y,room.start.y) - 1;
 
@@ -567,10 +558,8 @@ Room.prototype.addVertPath = function(room, path, wall) {
          // console.log('Room '+this.id+' starty : ' + path.start.y + ' end y: ' + path.end.y);
 
           game.addPath(path, this.id, 'addVertPath',tileCode);
-   }
-   else {
 
-          removeNeighbors(this,room);
+          this.addNeighbor(room);
    }
    return path;
 
@@ -593,14 +582,10 @@ Room.prototype.addHorizPath = function(room, path, wall) {
   
 
    if (path.allowed) {
-          // use the right of whatever room is on the left
 
           game.addPath(path, this.id, 'addHorizPath', tileCode);
-   }
-   else {
 
-         removeNeighbors(this,room);
-   
+          this.addNeighbor(room);
    }
    return path;
 
@@ -610,17 +595,13 @@ Room.prototype.directConnect = function(room, tolerance) {
  let path = new Path();
  
  // convert tolerance to a wall value
- let wall = -1*(tolerance/2);
-
- console.log('** Wall: ' + wall);
+ const wall = -1*(tolerance/2);
 
 
  if (this.overlapsHoriz(room, tolerance)) {
-   console.log('trying vert');
       path = this.addVertPath(room,path,wall);  
  }
  else {
-   console.log('trying horiz');
       path = this.addHorizPath(room,path,wall);
  }
 

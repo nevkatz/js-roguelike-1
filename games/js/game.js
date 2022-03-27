@@ -36,15 +36,7 @@ Game.prototype.reset = function() {
 }
 
 Game.prototype.inRoom = function({x,y}) {
-
-   let inRoom = null;
-   for (var room of this.rooms) {
-
-      if (room.encloses(x,y)) {
-         return room.id;
-      }
-   }
-   return null;
+   return this.rooms.find(r => r.encloses(x,y));
 }
 
 Game.prototype.addPath = function(path, id, src, tileCode) {

@@ -271,7 +271,7 @@ function showVertOverlap() {
    }
 
 }
-function showHorizDoorLine() {
+function showHorizdoorTiles() {
    resetMap();
 
    let r1 = {
