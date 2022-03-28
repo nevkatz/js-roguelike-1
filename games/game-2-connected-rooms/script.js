@@ -384,32 +384,40 @@ function generateMapRooms() {
 
    resetMap();
 
-   let center = {
+   /*let center = {
       x: COLS / 2,
       y: ROWS / 2
    };
 
-   addRoom(center);
+   addRoom(center);*/
 
    let maxRooms = 30;
 
    for (var i = 0; i < maxRooms; ++i) {
       addRoom();
    }
+   let success = false;
+
+   const min = 3;
    for (var room of game.rooms) {
 
-      let success = room.findFacingRooms(-2);
+      success = room.findFacingRooms(min);
 
-      // find facing or diagonal rooms
-      let neighbor = room.nearestNeighbor();
+      console.log(`Room${room.id} find facing: ${success}`);
+      console.log(`Room${room.id} facing neighbors: ${room.neighbors.length}`);
+
+      // make diagonal-only? 
+      success = room.nearestNeighbor();
  
-      if (neighbor) {
-         success = room.connectRoom(neighbor);
-      }
+      console.log(`Room${room.id} nearest neighbor: ${success}`);
    }
-   for (var room of game.rooms) {
-     room.connectRemaining();
-   }
+   //for (var room of game.rooms) {
+     let myRoom = game.rooms[0];
+
+     let {numConnected, numDisc} = myRoom.connectRemaining();
+
+     console.log(`Room${myRoom.id} conected ${numConnected} out of ${numDisc} disconnected rooms`);
+   //}
 }
 
 function printNeighbors() {
@@ -644,12 +652,12 @@ function generateEnemies(amount) {
 
 function generatePlayer() {
 
-   // var coords = generateValidCoords();
+   let coords = generateValidCoords();
 
-   var coords = {
+  /* var coords = {
       x: COLS / 2,
       y: ROWS / 2
-   };
+   };*/
 
    // level, health, weapon, coords, xp
    player = new Player(1, 100, WEAPONS[0], coords, 30);

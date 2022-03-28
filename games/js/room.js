@@ -25,45 +25,19 @@ Room.prototype.overlapsHoriz = function(room, tolerance=0) {
    return this.start.x - tolerance <= room.end.x &&
            this.end.x + tolerance >= room.start.x;
 }
-Room.prototype.sharesX = function(room, minTiles=1) {
 
- /** start
-  *  |
-  *  *------*             *------*
-  *  | room |             | room |
-  *  *------* <-- end     *------*
-  *    s       e
-  *    *-------*
-  *    |  this |
-  *    *-------*
-  */ 
-   return  room.end.x - this.start.x >= minTiles &&
-           this.end.x - room.start.x >= minTiles;
-}
-Room.prototype.sharesCoordsWith = function(room, coord, minCoords=1) {
+/**
+ * @param {Object} room
+ * @param {String} coord - x or y
+ * @param {Number} min - the minimum number of coords/tiles that should be shared.
+ * 
+ */ 
+Room.prototype.sharesCoordsWith = function(room, coord, min=1) {
 
- /** start
-  *  |
-  *  *------*             *------*
-  *  | room |             | room |
-  *  *------* <-- end     *------*
-  *    s       e
-  *    *-------*
-  *    |  this |
-  *    *-------*
-  * The difference between roomA end and room B end needs to be greater than minTiles
-  * 
-  */ 
-   return  room.end[cord] - this.start[cord] >= minCoords &&
-           this.end[cord] - room.start[cord] >= minCoords;
-}
-Room.prototype.overlapsLeft = function(room, tolerance=0) {
+   return room.end[coord] - this.start[coord] >= min &&
+           this.end[coord] - room.start[coord] >= min;
 
-   return this.overlapsHoriz && this.center.x <= room.center.x;
-}
-Room.prototype.overlapsRight = function(room, tolerance=0) {
 
-   return this.overlapsHoriz && this.center.x >= room.center.x;
 }
 
 /**
@@ -74,13 +48,15 @@ Room.prototype.overlapsVert = function(room, tolerance=0) {
    return this.start.y - tolerance <= room.end.y &&
           this.end.y + tolerance >= room.start.y;
 }
-Room.prototype.overlapsTop = function(room, tolerance=0) {
+Room.prototype.overlapsTop = function(room, min=1) {
 
-   return this.overlapsVert(room) && this.center.y <= room.center.y;
+   return this.sharesCoordsWith(room,'y',min) && 
+          this.center.y <= room.center.y;
 }
-Room.prototype.overlapsBot = function(room, tolerance=0) {
+Room.prototype.overlapsBot = function(room, min=1) {
 
-   return this.overlapsVert(room) && this.center.y >= room.center.y;
+   return this.sharesCoordsWith(room,'y',min) && 
+          this.center.y >= room.center.y;
 }
 
  /**
@@ -156,17 +132,7 @@ Room.prototype.alignedHoriz = function(room) {
 
 
 
-/**
- *  Used
- */ 
-Room.prototype.findOverlapping = function() {
 
-   let rooms  = this.findPotentialRooms();
-
-   rooms = rooms.filter(room => this.overlapsHoriz(room) || this.overlapsVert(room));
-
-   return rooms;
-}
 Room.prototype.horizDist = function(room) {
    return this.onLeft(room) ? room.start.x - this.end.x : this.start.x - room.end.x;
 }
@@ -175,11 +141,11 @@ Room.prototype.vertDist = function(room) {
 }
 
 Room.prototype.adjacentVert = function(room, limit) {
-   return this.horizDist(room) < limit && this.overlapsVert(room);
+   return this.horizDist(room) < limit && this.sharesCoordsWith(room, 'y');
 }
 
 Room.prototype.adjacentHoriz = function(room, limit) {
-   return this.vertDist(room) < limit && this.overlapsHoriz(room);
+   return this.vertDist(room) < limit && this.sharesCoordsWith(room, 'x');
 }
 Room.prototype.isAdjacent = function(room) {
 
@@ -187,22 +153,25 @@ Room.prototype.isAdjacent = function(room) {
 
    return this.adjacentVert(room, limit) || this.adjacentHoriz(room, limit);
 }
-Room.prototype.findFacingRooms = function(tolerance=0, maxRooms=1) {
+/**
+ * @param {Number} min - the minimum number of x or y coordinates facing rooms should share.
+ * @param {Number} maxRooms - the maximum # of ooms a room should connect with.
+ */ 
+Room.prototype.findFacingRooms = function(min=1, maxRooms=1) {
 
-  // console.log(`Room${this.id} findFacing with tolerance ` + tolerance);
    let success = false;
    
    let rooms = this.findPotentialRooms();
 
    for (var room of rooms) {
 
-      if ((this.overlapsHoriz(room,tolerance) && !this.roomBetween(room)) ||
+      if (!this.roomBetween(room) && 
 
-          (this.overlapsVert(room, tolerance) && !this.roomBetween(room))) {
+         (this.sharesCoordsWith(room,'x', min) || 
+          this.sharesCoordsWith(room,'y', min))) {
 
-         success = this.connectRoom(room, tolerance);
+          success = this.connectRoom(room, min);
 
-      console.log('success: ' + success);
       }
       if (this.neighbors.length >= maxRooms) {
          break;
@@ -229,6 +198,7 @@ Room.prototype.connectRemaining = function() {
 
    let rooms = this.findPotentialRooms();
    let connectedRooms = [];
+   let numConnected = 0;
 
    connectedRooms = this.searchNeighbors(this,connectedRooms);
    let connectedRoomIds = connectedRooms.map(x => x.id);
@@ -240,10 +210,13 @@ Room.prototype.connectRemaining = function() {
 
       let success = this.findNearbyRoom(room, connectedRooms);
       console.log(`Remaining room${room.id} success: ${success}`);
+      //debug
+      if (success) {
+         numConnected++;
+      }
 
     }
-
-    return;
+    return {numConnected, numDisc:disconnected.length};
 }
 
 
@@ -293,25 +266,23 @@ Room.prototype.onRight = function(room) {
 
 Room.prototype.betweenHoriz = function(room1,room2) {
 
-  return this.overlapsVert(room1) && 
-           this.overlapsVert(room2) &&
-           room1.overlapsVert(room2) &&
+  return this.sharesCoordsWith(room1,'y') && 
+         this.sharesCoordsWith(room2,'y') &&
+         room1.sharesCoordsWith(room2,'y') &&
+
           ((this.center.x > room1.center.x && this.center.x < room2.center.x) ||
           (this.center.x > room2.center.x && this.center.x < room1.center.x));
-
-
 }
 Room.prototype.betweenVert = function(room1,room2) {
 
-   let b = this.overlapsHoriz(room1) && 
-           this.overlapsHoriz(room2) &&
-           room1.overlapsVert(room2) &&
+   return this.sharesCoordsWith(room1,'x') && 
+           this.sharesCoordsWith(room2,'x') &&
+           room1.sharesCoordsWith(room2,'x') &&
          ((this.center.y > room1.center.y && this.center.y < room2.center.y) ||
           (this.center.y > room2.center.y && this.center.y < room1.center.y));
 
-   return b;
-
 }
+
 Room.prototype.roomBetween = function(room) {
    let testRooms = game.rooms.filter(x => x.id != this.id && x.id != room.id);
    for (var testRoom of testRooms) {
@@ -328,14 +299,20 @@ Room.prototype.addNeighbor = function(room) {
    this.neighbors.push(room);
    room.neighbors.push(this);
 }
-Room.prototype.connectRoom = function(room, tolerance=-2) {
+/**
+ * 
+ * @param {Number} room - the other room object
+ * 
+ * @param {Number} min - the minimum number of common coordinates
+ */ 
+Room.prototype.connectRoom = function(room, min=3) {
 
    let success = false;
 
-   if (this.overlapsHoriz(room, tolerance) || 
-       this.overlapsVert(room,tolerance)) {
+   if (this.sharesCoordsWith(room, 'x', min) || 
+       this.sharesCoordsWith(room, 'y', min)) {
 
-      success = this.directConnect(room, tolerance);
+      success = this.directConnect(room, min);
 
    }
    
@@ -431,10 +408,6 @@ Room.prototype.cornerVert = function(room, corner) {
   return this.neighbors.includes(room);
 }
 
-function removeNeighbors(room1,room2) {
-    room1.neighbors.splice(room1.neighbors.indexOf(room2.id), 1);
-    room2.neighbors.splice(room2.neighbors.indexOf(room1.id), 1);
-}
 Room.prototype.cornerHoriz = function(room, corner) {
 
    console.log(`room${this.id} is using cornerHoriz to connect with room${room.id}`);
@@ -525,7 +498,7 @@ Room.prototype.alignedEdges = function(room,axis) {
 Room.prototype.alignedCenters = function(room,axis) {
    return this.center[axis] == room.centers[axis];
 }
-Room.prototype.getdoorTiles = function(room,axis,wall) {
+Room.prototype.getDoorTiles = function(room,axis,wall) {
    let doorTiles = new Path();
 
 
@@ -539,7 +512,7 @@ Room.prototype.getdoorTiles = function(room,axis,wall) {
 }
 Room.prototype.placeDoorX = function(room,path,wall) {
    
-   let doorTiles = this.getdoorTiles(room,'x',wall);
+   let doorTiles = this.getDoorTiles(room,'x',wall);
 
    for (var x = doorTiles.start.x; x <= doorTiles.end.x; ++x) {
 
@@ -558,7 +531,7 @@ Room.prototype.placeDoorX = function(room,path,wall) {
 }
 Room.prototype.placeDoorY = function(room,path,wall) {
    
-   let doorTiles = this.getdoorTiles(room,'y', wall);
+   let doorTiles = this.getDoorTiles(room,'y', wall);
 
    for (var y = doorTiles.start.y; y <= doorTiles.end.y; ++y) {
 
@@ -623,15 +596,14 @@ Room.prototype.addHorizPath = function(room, path, wall) {
    return path;
 
 }
-Room.prototype.directConnect = function(room, tolerance) {
+Room.prototype.directConnect = function(room, min) {
 
  let path = new Path();
  
- // convert tolerance to a wall value
- const wall = -1*(tolerance/2);
+ const wall = parseInt((min-1)/2);
 
+ if (this.sharesCoordsWith(room, 'x', min)) {
 
- if (this.overlapsHoriz(room, tolerance)) {
       path = this.addVertPath(room,path,wall);  
  }
  else {
@@ -672,6 +644,10 @@ Room.prototype.findNearest = function(myRoom, rooms) {
    }
    return nearestRoom;
 }
+
+/**
+ * Find the first room in the list you can connect with.
+ */ 
 Room.prototype.findNearbyRoom = function(myRoom, rooms) {
    let shortest = null;
    let nearestRoom = null;
@@ -681,8 +657,6 @@ Room.prototype.findNearbyRoom = function(myRoom, rooms) {
       if (!myRoom.roomBetween(room)) {
         
          let success = myRoom.connectRoom(room);
-
-        // console.log('tried to connect Room' + room.id + ' to Room' + myRoom.id + '. Success: ' + success);
          
          if (success) {
             return true;
@@ -695,8 +669,7 @@ Room.prototype.findNearbyRoom = function(myRoom, rooms) {
 Room.prototype.nearestNeighbor = function() {
 
    let maxNeighbors = 4;
-   let shortest = null,
-      nearestRoom = null;
+   let shortest = null, nearestRoom = null, success = false;
 
    let rooms = this.findPotentialRooms();
 
@@ -714,5 +687,8 @@ Room.prototype.nearestNeighbor = function() {
         
       //}
    }
-   return nearestRoom;
+   if (nearestRoom) {
+      success = this.connectRoom(nearestRoom);
+   }
+   return success;
 }
