@@ -666,15 +666,24 @@ Room.prototype.nearestNeighbor = function() {
    let validRooms = [];
 
    const distanceTo = (room) => {
-      let diffX = this.x - room.x;
-      let diffY = this.y - room.y;
-      let dist = Math.sqrt(Math.pow(diffX, 2) + Math.pow(diffY, 2));
+      let diffX = this.center.x - room.center.x;
+      let diffY = this.center.y - room.center.y;
+
+      let x = Math.sqrt(Math.pow(diffX, 2) + Math.pow(diffY, 2));
+
+      console.log('dist: ' + x);
+      return x;
+   
    };
    const compareDist = (room1,room2) => {
       return distanceTo(room1) - distanceTo(room2);
    };
 
    let sorted = rooms.sort(compareDist);
+
+   const distances = sorted.map(distanceTo);
+
+   //console.log('distances: ' + distances);
 
    for (let room of sorted) {
 
