@@ -208,11 +208,14 @@ Room.prototype.connectRemaining = function() {
 
    for (var room of disconnected) {
 
-      let success = this.findNearbyRoom(room, connectedRooms);
-      console.log(`Remaining room${room.id} success: ${success}`);
+      let success = room.nearestNeighbor(connectedRooms);
       //debug
       if (success) {
+         console.log(`** remaining Room${room.id} found a match`)
          numConnected++;
+      }
+      else {
+         console.log(`remaining Room${room.id} could not connect`);
       }
 
     }
@@ -238,19 +241,19 @@ Room.prototype.encloses = function(x,y) {
 }
 
 Room.prototype.below = function(room) {
-   return this.start.y > room.start.y;
+   return this.center.y > room.center.y;
 };
 
 Room.prototype.above = function(room) {
-   return this.start.y < room.start.y;
+   return this.center.y < room.center.y;
 };
 
 Room.prototype.onLeft = function(room) {
-   return this.start.x < room.start.x;
+   return this.center.x < room.center.x;
 }
 
 Room.prototype.onRight = function(room) {
-   return this.end.x > room.end.x;
+   return this.center.x > room.center.x;
 }
 
 Room.prototype.betweenHoriz = function(room1,room2) {
@@ -320,10 +323,9 @@ Room.prototype.connectRoom = function(room, min=3) {
       if (!success && !game.inRoom(horizCorner)) {
          success = this.cornerHoriz(room, horizCorner);
       }
-      else {
-         console.log(`room${this.id} and room${room.id} cannot find a workable corner.`);
-      }
+      
    }
+   console.log(`[connectRoom] room${this.id} success: ` + success);
    return success;
 }
 
@@ -331,7 +333,7 @@ Room.prototype.cornerVert = function(room, corner) {
 
    console.log(`room${this.id} is using cornerVert to connect with room${room.id}`);
 
-   let horiz = new Path(), vert = new Path();
+   let vert = new Path(), horiz = new Path();
 
       /**
        *  *--- room (onRight)
@@ -339,28 +341,6 @@ Room.prototype.cornerVert = function(room, corner) {
        *  |
        * this
        */
-      if (this.onLeft(room)) {
-
-         horiz.start = corner;
-
-         horiz.end = {x:room.start.x - 1, y:room.center.y};
- 
-      }
-      /**  
-       * 
-       * If on right, start horizontal path from the room on left.
-       * End the horizontal path at this room's center.
-       *  room ---*
-       *          |
-       *         this
-       */
-      if (this.onRight(room)) {
-
-           horiz.start = {x:room.end.x + 1, y:room.center.y};
-           horiz.end = corner;
-     
-      }
-
       /**
        *    this
        *      |    
@@ -384,10 +364,42 @@ Room.prototype.cornerVert = function(room, corner) {
 
           vert.end = {x:this.center.x, y:this.start.y - 1};
       }
+       /**  
+       * 
+       * If on left, start horizontal path from the room on left.
+       * End the horizontal path at this room's center.
+       *  this 
+       *    |    
+       *    * ---this
+       */
+
+      if (this.onLeft(room)) {
+
+         horiz.start = corner;
+
+         horiz.end = {x:room.start.x - 1, y:room.center.y};
+ 
+      }
+      /**  
+       * 
+       * If on right, start horizontal path from the room on left.
+       * End the horizontal path at this room's center.
+       *  room ---*
+       *          |
+       *         this
+       */
+      if (this.onRight(room)) {
+
+           horiz.start = {x:room.end.x + 1, y:room.center.y};
+           horiz.end = corner;
+     
+      }
+
+      
 
       let tileCode = DEBUG ? ITEM_CODE : FLOOR_CODE;
 
-      if (!vert.isAdjacentVert(null, 'corner') && !horiz.isAdjacentHoriz(null,'corner')) {
+      if (!vert.isAdjacentVert() && !horiz.isAdjacentHoriz()) {
            game.addPath(vert,null, null, tileCode);
            game.addPath(horiz,null, null, tileCode);
 
@@ -399,54 +411,76 @@ Room.prototype.cornerVert = function(room, corner) {
 
 Room.prototype.cornerHoriz = function(room, corner) {
 
-   console.log(`room${this.id} is using cornerHoriz to connect with room${room.id}`);
+   console.log(`MC room${this.id} is using cornerHoriz to connect with room${room.id}`);
    // assumes branches go out from sides.
 
    let horiz = new Path(), vert = new Path;
    
       /**  
+       * 
+       * ON LEFT
+       * 
        *  this  ----*
        *            |
        *            |
        *          room
+       *            |
+       *            |
+       *  this -----*
        */
-      if (this.onLeft(room)) {
+      // on left
+      if (room.center.x > this.end.x) {
          horiz.start = {x:this.end.x + 1,y:this.center.y},
          horiz.end = corner
       }
       /**
+       * 
+       * ON RIGHT
+       * 
        *  *--- this (onRight)
        *  |
        *  |
        * room
+       *  |
+       *  |
+       *  *--- this (onRight)
        */
-      if (this.onRight(room)) {
+      else if (room.center.x < this.start.x) {
          horiz.start  = corner,
          horiz.end = {x:this.start.x - 1,y:this.center.y}
- 
       }
+      else {
+         console.log(`Target room${room.id} center x is between MC Room${this.id} start and end; corner connect failed`);
+         return false;
+      }
+    
       /**
-       *    this---*
+       * ABOVE
+       *    this---*---this
        *           |
        *          room
        * 
        */ 
-      if (this.above(room)) {
+      if (this.center.y < room.start.y) {
            vert.start = corner,
              // end at top center of other room
            vert.end = {x:room.center.x, y:room.start.y - 1}
     
       }
       /*
-
-      room                    room
-      |                        |
-      |                        |
-      *----this        this----*
+      BELOW
+                  room
+                    |
+                    |
+         this-------*-------this
        */
-      if (this.below(room)) {
+      else if (this.center.y > room.end.y) {
           vert.start = {x:room.center.x, y:room.end.y + 1},
           vert.end = corner
+      }
+      else {
+         console.log(`MC Room${this.id} center y is between Target Room${room.id} start and end; corner connect failed`);
+         return false;
       }
 
       if (!vert.isAdjacentVert(null, 'corner') && !horiz.isAdjacentHoriz(null, 'corner')) {
@@ -610,26 +644,6 @@ Room.prototype.findPotentialRooms = function() {
    //console.log(this.id + ' neighbors: '+this.neighbors.map(x => x.id)+' potential rooms: ' + rooms.map(x=>x.id));
    return rooms;
 }
-Room.prototype.findNearest = function(myRoom, rooms) {
-   let shortest = null;
-   let nearestRoom = null;
-
-   for (var room of rooms) {
-   //   console.log('type of room in findNearest: ' + typeof(room));
-      let diffX = myRoom.x - room.x;
-      let diffY = myRoom.y - room.y;
-
-      let dist = Math.sqrt(Math.pow(diffX, 2) + Math.pow(diffY, 2));
-
-      console.log(myRoom.id + ' has a room between ' + room.id + ': ' + myRoom.roomBetween(room));
-
-      if (!myRoom.roomBetween(room) && (!shortest || dist < shortest)) {
-         shortest = dist;
-         nearestRoom = room;
-      }
-   }
-   return nearestRoom;
-}
 
 /**
  * Find the first room in the list you can connect with.
@@ -655,15 +669,13 @@ Room.prototype.findNearbyRoom = function(myRoom, rooms) {
    }
    return false;
 }
-Room.prototype.nearestNeighbor = function() {
+Room.prototype.nearestNeighbor = function(rooms) {
 
-   let shortest = null, nearestRoom = null, success = false;
+   let success = false;
 
-   let rooms = this.findPotentialRooms();
+   rooms = rooms || this.findPotentialRooms();
 
    rooms = rooms.filter(x => !this.roomBetween(x));
-
-   let validRooms = [];
 
    const distanceTo = (room) => {
       let diffX = this.center.x - room.center.x;
@@ -671,19 +683,13 @@ Room.prototype.nearestNeighbor = function() {
 
       let x = Math.sqrt(Math.pow(diffX, 2) + Math.pow(diffY, 2));
 
-      console.log('dist: ' + x);
       return x;
-   
    };
    const compareDist = (room1,room2) => {
       return distanceTo(room1) - distanceTo(room2);
    };
 
    let sorted = rooms.sort(compareDist);
-
-   const distances = sorted.map(distanceTo);
-
-   //console.log('distances: ' + distances);
 
    for (let room of sorted) {
 

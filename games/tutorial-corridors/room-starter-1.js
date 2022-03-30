@@ -160,7 +160,7 @@ Room.prototype.findPotentialRooms = function() {
  */ 
 Room.prototype.findFacingRooms = function(min=1, maxRooms=1) {
 
-   let success = false;
+   let success = FALSE;
    
  
    return success;
