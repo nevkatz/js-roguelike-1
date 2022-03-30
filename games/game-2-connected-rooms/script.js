@@ -407,7 +407,7 @@ function generateMapRooms() {
       console.log(`Room${room.id} facing neighbors: ${room.neighbors.length}`);
 
       // make diagonal-only? 
-      success = room.nearestNeighbor();
+      //success = room.nearestNeighbor();
  
       console.log(`Room${room.id} nearest neighbor: ${success}`);
    }

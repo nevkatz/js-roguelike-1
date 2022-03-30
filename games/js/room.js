@@ -214,6 +214,14 @@ Room.prototype.connectRemaining = function() {
       if (success) {
          numConnected++;
       }
+     /* else {
+         let id = room.id;
+         room.fillMap(WALL_CODE);
+         let idx = game.rooms.indexOf(room);
+         game.rooms.splice(idx,1);
+
+         console.log(`Room${id} removed!`);
+      }*/
 
     }
     return {numConnected, numDisc:disconnected.length};
@@ -230,12 +238,13 @@ Room.prototype.overlaps = function(room, tolerance=0) {
 }
 
 
-Room.prototype.fillMap = function() {
+Room.prototype.fillMap = function(tileCode=FLOOR_CODE) {
+
 
    for (var y = this.start.y; y <= this.end.y; ++y) {
       for (var x = this.start.x; x <= this.end.x; ++x) {
 
-         game.map[y][x] = FLOOR_CODE;
+         game.map[y][x] = tileCode
       }
    }
 }
