@@ -1,62 +1,77 @@
 class Path {
 
-	constructor(points={}) {
+   constructor(points = {}) {
 
-		this.start = points.start || {x:0,y:0};
+      this.start = points.start || {
+         x: 0,
+         y: 0
+      };
 
-		this.end = points.end || {x:0,y:0};
+      this.end = points.end || {
+         x: 0,
+         y: 0
+      };
 
-		this.allowed = false;
+      this.allowed = false;
 
-	}
+   }
 }
+/**
+ * @param {Number} testX
+ */ 
+Path.prototype.isAdjacentVert = function(testX) {
 
+   const limit = 5;
 
+   const x = testX || this.start.x;
 
-Path.prototype.isAdjacentVert = function(testX,type) {
+   for (var diff of [-1, 1]) {
 
-   let score = 0, limit = 5;
+      let consecutive = 0;
 
-   let x = testX || this.start.x;
+      for (var y = this.start.y; y <= this.end.y; ++y) {
 
-   for (var y = this.start.y; y <= this.end.y; ++y) {
+         if (game.map[y][x + diff] != WALL_CODE) {
+            consecutive++;
 
-         if (game.map[y][x-1] != WALL_CODE ||
-             game.map[y][x+1] != WALL_CODE) {
-
-            score++;
-            
-            if (score == limit) {
+            if (consecutive == limit) {
                return true;
             }
 
+         } else {
+            consecutive = 0;
          }
-         else {
-            score = 0;
-         }
+      }
+
    }
-    console.log('adjacent vert score at '+x+': ' + score + ' type: ' + type);
    return false;
 }
 
-Path.prototype.isAdjacentHoriz = function(testY,type) {
-   let score = 0;
-   let limit = 5;
+Path.prototype.isAdjacentHoriz = function(testY) {
 
-   let y = testY || this.start.y;
+   const limit = 5;
 
-   for (var x = this.start.x; x <= this.end.x; ++x) {
-         if ((game.map[y-1] && game.map[y-1][x] != WALL_CODE) ||
-             (game.map[y+1] && game.map[y+1][x] != WALL_CODE)) {
-                
-                score++;
+   const y = testY || this.start.y;
 
-                if (score == limit) { return true; }
+   for (let diff of [-1, 1]) {
+
+      let consecutive = 0;
+
+      for (var x = this.start.x; x <= this.end.x; ++x) {
+
+         if (game.map[y + diff] &&
+            game.map[y + diff][x] != WALL_CODE) {
+
+            consecutive++;
+
+            if (consecutive == limit) {
+               return true;
+            }
+
+         } else {
+            consecutive = 0;
          }
-         else {
-            score = 0;
-         }
+      }
    }
-   console.log('adjacent horiz score at '+y+': ' + score + ' type: ' + type + ' start: ' + this.start.x + ' end: ' + this.end.x);
    return false;
 }

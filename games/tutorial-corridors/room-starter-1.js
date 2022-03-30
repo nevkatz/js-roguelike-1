@@ -216,7 +216,7 @@ Room.prototype.roomBetween = function(room) {
   * @param {Number} wall
   * 
   */ 
-Room.prototype.getDoorTiles = function(room,axis,wall) {
+Room.prototype.possibleExits = function(room,axis,wall) {
   
 
 }
@@ -228,7 +228,7 @@ Room.prototype.getDoorTiles = function(room,axis,wall) {
   * @param {Number} wall
   * 
   */
-Room.prototype.placeDoorX = function(room,path,wall) {
+Room.prototype.placePathX = function(room,path,wall) {
    
 
 }
@@ -240,7 +240,7 @@ Room.prototype.placeDoorX = function(room,path,wall) {
   * @param {Number} wall
   * 
   */
-Room.prototype.placeDoorY = function(room,path,wall) {
+Room.prototype.placePathY = function(room,path,wall) {
  
 }
  /**

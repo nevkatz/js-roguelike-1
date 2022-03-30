@@ -148,6 +148,13 @@ Room.prototype.sharesCoordsWith = function(room, coord, min=1) {
  *        the method-calling room or current neighbors.
  */ 
 Room.prototype.findPotentialRooms = function() {
+
+   // there is a better way to instantiate this
+   let rooms = [];
+
+   // filter out method-calling room and its neighbors
+
+   return rooms;
  
 }
 /**
@@ -159,12 +166,17 @@ Room.prototype.findPotentialRooms = function() {
  * @param {Number} maxRooms - the maximum # of ooms a room should connect with.
  */ 
 Room.prototype.findFacingRooms = function(min=1, maxRooms=1) {
-
+  
    let success = false;
-   
- 
+   let rooms = this.findPotentialRooms();
+  
+   for (var room of rooms) {   
+     
+        // try to connect with potential rooms
+        // break out of the loop when neighbors >= maxRooms
+     
+   }
    return success;
-   // filter out the closest neighbors
 }
 
 
@@ -216,7 +228,7 @@ Room.prototype.roomBetween = function(room) {
   * @param {Number} wall
   * 
   */ 
-Room.prototype.getDoorTiles = function(room,axis,wall) {
+Room.prototype.possibleExits = function(room,axis,wall) {
   
 
 }
@@ -228,7 +240,7 @@ Room.prototype.getDoorTiles = function(room,axis,wall) {
   * @param {Number} wall
   * 
   */
-Room.prototype.placeDoorX = function(room,path,wall) {
+Room.prototype.placePathX = function(room,path,wall) {
    
 
 }
@@ -240,7 +252,7 @@ Room.prototype.placeDoorX = function(room,path,wall) {
   * @param {Number} wall
   * 
   */
-Room.prototype.placeDoorY = function(room,path,wall) {
+Room.prototype.placePathY = function(room,path,wall) {
  
 }
  /**

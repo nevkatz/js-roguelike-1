@@ -245,21 +245,6 @@ function labelRooms() {
    });
 }
    
-function resetMap() {
-
-   game.map = [];
-   // generate a solid wall.
-   for (var row = 0; row < ROWS; row++) {
-      // create row
-      game.map.push([]);
-
-      for (var col = 0; col < COLS; col++) {
-         // create wall
-         game.map[row].push(WALL_CODE);
-      }
-   }
-
-}
 
 /**
  * Randomly generates a set of dimensions.
@@ -367,7 +352,7 @@ function addRoom(c) {
    game.curRoomId++;
 
 
-   room.fillMap();
+   game.carveRoom(room);
 
    game.rooms.push(room);
    return room;
@@ -382,14 +367,7 @@ function addRoom(c) {
 
 function generateMapRooms() {
 
-   resetMap();
-
-   /*let center = {
-      x: COLS / 2,
-      y: ROWS / 2
-   };
-
-   addRoom(center);*/
+   game.resetMap();
 
    let maxRooms = 30;
 
@@ -399,6 +377,7 @@ function generateMapRooms() {
    let success = false;
 
    const min = 3;
+
    for (var room of game.rooms) {
 
       success = room.findFacingRooms(min);
@@ -407,17 +386,16 @@ function generateMapRooms() {
       console.log(`Room${room.id} facing neighbors: ${room.neighbors.length}`);
 
       // make diagonal-only? 
-      //success = room.nearestNeighbor();
+      success = room.nearestNeighbor();
  
       console.log(`Room${room.id} nearest neighbor: ${success}`);
    }
-   //for (var room of game.rooms) {
-     let myRoom = game.rooms[0];
+   for (var myRoom of game.rooms) {
 
      let {numConnected, numDisc} = myRoom.connectRemaining();
 
-     console.log(`Room${myRoom.id} conected ${numConnected} out of ${numDisc} disconnected rooms`);
-   //}
+     console.log(`Room${room.id} conected ${numConnected} out of ${numDisc} disconnected rooms`);
+   }
 }
 
 function printNeighbors() {
@@ -436,7 +414,7 @@ function generateMapTunnels() {
 
    // set up total number of tiles used
    // and the total number of penalties made
-   resetMap();
+   game.resetMap();
 
 
    let pos = {

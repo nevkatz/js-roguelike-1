@@ -48,3 +48,29 @@ Game.prototype.addPath = function(path, id, src, tileCode) {
    }
 }
 
+Game.prototype.resetMap = function() {
+
+   this.map = [];
+   // generate a solid wall.
+   for (var row = 0; row < ROWS; row++) {
+      // create row
+      this.map.push([]);
+
+      for (var col = 0; col < COLS; col++) {
+         // create wall
+         this.map[row].push(WALL_CODE);
+      }
+   }
+}
+Game.prototype.carveRoom = function(room) {
+
+   for (var y = room.start.y; y <= room.end.y; ++y) {
+      for (var x = room.start.x; x <= room.end.x; ++x) {
+
+         this.map[y][x] = FLOOR_CODE;
+      }
+   }
+}
+
+
+

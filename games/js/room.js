@@ -214,14 +214,6 @@ Room.prototype.connectRemaining = function() {
       if (success) {
          numConnected++;
       }
-     /* else {
-         let id = room.id;
-         room.fillMap(WALL_CODE);
-         let idx = game.rooms.indexOf(room);
-         game.rooms.splice(idx,1);
-
-         console.log(`Room${id} removed!`);
-      }*/
 
     }
     return {numConnected, numDisc:disconnected.length};
@@ -235,18 +227,6 @@ Room.prototype.connectRemaining = function() {
 Room.prototype.overlaps = function(room, tolerance=0) {
   // console.log(`Room${this.id} overlaps tolerance: ${tolerance}`);
    return this.overlapsHoriz(room, tolerance) && this.overlapsVert(room, tolerance);
-}
-
-
-Room.prototype.fillMap = function(tileCode=FLOOR_CODE) {
-
-
-   for (var y = this.start.y; y <= this.end.y; ++y) {
-      for (var x = this.start.x; x <= this.end.x; ++x) {
-
-         game.map[y][x] = tileCode
-      }
-   }
 }
 
 
@@ -507,23 +487,20 @@ Room.prototype.alignedEdges = function(room,axis) {
 Room.prototype.alignedCenters = function(room,axis) {
    return this.center[axis] == room.centers[axis];
 }
-Room.prototype.getDoorTiles = function(room,axis,wall) {
-   let doorTiles = new Path();
+Room.prototype.possibleExits = function(room,axis,wall) {
+ 
+   let start = Math.max(this.start[axis] + wall, room.start[axis] + wall);
 
+   let end = Math.min(this.end[axis] - wall, room.end[axis] - wall);
 
-   doorTiles.start[axis] = Math.max(this.start[axis] + wall, room.start[axis] + wall);
-
-   doorTiles.end[axis] = Math.min(this.end[axis] - wall, room.end[axis] - wall);
-
-
-   return doorTiles;
+   return {start, end};
 
 }
-Room.prototype.placeDoorX = function(room,path,wall) {
+Room.prototype.placePathX = function(room,path,wall) {
    
-   let doorTiles = this.getDoorTiles(room,'x',wall);
+   let {start, end} = this.possibleExits(room,'x',wall);
 
-   for (var x = doorTiles.start.x; x <= doorTiles.end.x; ++x) {
+   for (var x = start; x <= end; ++x) {
 
          // add inRoom logic for corners? 
          if (!path.isAdjacentVert(x)) {
@@ -538,11 +515,11 @@ Room.prototype.placeDoorX = function(room,path,wall) {
    }
    return path;
 }
-Room.prototype.placeDoorY = function(room,path,wall) {
+Room.prototype.placePathY = function(room,path,wall) {
    
-   let doorTiles = this.getDoorTiles(room,'y', wall);
+   let {start, end} = this.possibleExits(room,'y', wall);
 
-   for (var y = doorTiles.start.y; y <= doorTiles.end.y; ++y) {
+   for (var y = start; y <= end; ++y) {
 
          if (!path.isAdjacentHoriz(y)) {
               console.log('Room'+this.id+' -- path is good at '+y);
@@ -567,7 +544,7 @@ Room.prototype.addVertPath = function(room, path, wall) {
 
    let tileCode = FLOOR_CODE;
 
-   path = this.placeDoorX(room,path,wall);
+   path = this.placePathX(room,path,wall);
  
    if (path.allowed) {
          // console.log('Room '+this.id+' starty : ' + path.start.y + ' end y: ' + path.end.y);
@@ -593,7 +570,7 @@ Room.prototype.addHorizPath = function(room, path, wall) {
    let tileCode = FLOOR_CODE;
 
  
-   path = this.placeDoorY(room,path,wall);
+   path = this.placePathY(room,path,wall);
   
 
    if (path.allowed) {
@@ -670,34 +647,43 @@ Room.prototype.findNearbyRoom = function(myRoom, rooms) {
          if (success) {
             return true;
          }
-         
+
+      }
+      else {
+         console.log(`room between ${myRoom} and ${room}`);
       }
    }
    return false;
 }
 Room.prototype.nearestNeighbor = function() {
 
-   let maxNeighbors = 4;
    let shortest = null, nearestRoom = null, success = false;
 
    let rooms = this.findPotentialRooms();
 
-   for (var room of rooms) {
+   rooms = rooms.filter(x => !this.roomBetween(x));
 
+   let validRooms = [];
+
+   const distanceTo = (room) => {
       let diffX = this.x - room.x;
       let diffY = this.y - room.y;
-
       let dist = Math.sqrt(Math.pow(diffX, 2) + Math.pow(diffY, 2));
-      if (!this.roomBetween(room) && (!shortest || dist < shortest || this.isAdjacent(room))) {
+   };
+   const compareDist = (room1,room2) => {
+      return distanceTo(room1) - distanceTo(room2);
+   };
 
-             shortest = dist;
-             nearestRoom = room;
-      }
-        
-      //}
-   }
-   if (nearestRoom) {
-      success = this.connectRoom(nearestRoom);
+   let sorted = rooms.sort(compareDist);
+
+   for (let room of sorted) {
+
+      success = this.connectRoom(room);
+
+      if (success) { 
+         console.log('match found for Room' + this.id);
+         break;
+       }
    }
    return success;
 }
