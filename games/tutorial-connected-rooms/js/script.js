@@ -16,11 +16,6 @@ const ENEMY_CODE = 3;
 const POTION_CODE = 4;
 const WEAPON_CODE = 5;
 
-const SPELL_CODE = 6;
-const ITEM_CODE = 7;
-const PATH_CODE = 8;
-const WARP_CODE = 9;
-
 const POTIONS = [10, 20, 30, 40, 50];
 
 // possible health that enemies can have
@@ -230,7 +225,7 @@ function startGame() {
        generateEnemies(TOTAL_ENEMIES);
       drawMap(0, 0, COLS, ROWS);
       updateStats();
-       labelRooms();
+      // labelRooms();
    }
 
 }
@@ -245,21 +240,6 @@ function labelRooms() {
    });
 }
    
-function resetMap() {
-
-   game.map = [];
-   // generate a solid wall.
-   for (var row = 0; row < ROWS; row++) {
-      // create row
-      game.map.push([]);
-
-      for (var col = 0; col < COLS; col++) {
-         // create wall
-         game.map[row].push(WALL_CODE);
-      }
-   }
-
-}
 
 /**
  * Randomly generates a set of dimensions.
@@ -333,11 +313,6 @@ function generateRoom(center, width, height) {
 
 }
 
-/**
- * Added in last tutorial.
- * 
- * @param {Object} c - optional argument for the coordinates of a specific location.
- */ 
 function addRoom(c) {
    const genCenterCoord = (maxCells, dim) => {
       // get limit on either side based on outer limit and a room dimension - width or height
@@ -372,7 +347,7 @@ function addRoom(c) {
    game.curRoomId++;
 
 
-   room.fillMap();
+   game.carveRoom(room);
 
    game.rooms.push(room);
    return room;
@@ -387,7 +362,7 @@ function addRoom(c) {
 
 function generateMapRooms() {
 
-   resetMap();
+   game.resetMap();
 
    let maxRooms = 30;
 
@@ -396,16 +371,28 @@ function generateMapRooms() {
    }
    let success = false;
 
-   /**
-    * @TODO: Add logic for connecting rooms
-    */ 
+   const min = 3;
+
+   for (var room of game.rooms) {
+
+      success = room.findFacingRooms(min);
+
+      // make diagonal-only? 
+      success = room.nearestNeighbor();
+ 
+   }
+   for (var myRoom of game.rooms) {
+
+     let {numConnected, numDisc} = myRoom.connectRemaining();
+
+     console.log(`Room${room.id} conected ${numConnected} out of ${numDisc} disconnected rooms`);
+   }
 }
 
 function printNeighbors() {
    for (var room of game.rooms) {
       let ids = room.neighbors.map(x => x.id);
 
-      console.log(`room${room.id} neighbors: ${ids}`);
    }
 }
 /**
@@ -417,7 +404,7 @@ function generateMapTunnels() {
 
    // set up total number of tiles used
    // and the total number of penalties made
-   resetMap();
+   game.resetMap();
 
 
    let pos = {
