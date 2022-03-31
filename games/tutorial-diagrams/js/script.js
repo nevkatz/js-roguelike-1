@@ -55,8 +55,7 @@ function init() {
    game.context = game.canvas.getContext("2d");
 
    
-   directConnectCorner();
-
+   showHorizDoorTiles();
 
 
 }
@@ -237,7 +236,7 @@ function addRoom(c) {
    game.curRoomId++;
 
 
-   room.fillMap();
+   game.carveRoom(room);
 
    game.rooms.push(room);
    return room;
@@ -317,6 +316,14 @@ function labelTile(x, y, color) {
    //  game.context.clearRect(x * 10, y * 10, 10, 10);
    game.context.beginPath();
    game.context.rect(x * TILE_DIM+1, y * TILE_DIM+1, TILE_DIM-2, TILE_DIM-2);
+   game.context.fillStyle = color;
+   game.context.fill();
+}
+function labelVertPathTile(x, y, color) {
+
+   //  game.context.clearRect(x * 10, y * 10, 10, 10);
+   game.context.beginPath();
+   game.context.rect(x * TILE_DIM+1, y * TILE_DIM, TILE_DIM-2, TILE_DIM);
    game.context.fillStyle = color;
    game.context.fill();
 }

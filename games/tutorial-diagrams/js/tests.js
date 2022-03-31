@@ -271,17 +271,17 @@ function showVertOverlap() {
    }
 
 }
-function showHorizdoorTiles() {
+function showHorizDoorTiles() {
    resetMap();
 
    let r1 = {
-      x:20,
-      y:30
+      x:10,
+      y:5
    };
 
    let r2 = {
-      x:26,
-      y:40
+      x:16,
+      y:15
    };
 
 
@@ -290,20 +290,24 @@ function showHorizdoorTiles() {
 
   // connectBasic(-1);
 
-   drawMap(0, 0, COLS, ROWS);
+   renderCanvas(28,20);
    
    //labelRooms();
 
   // drawBox(22,24,3,13,'#03c04a',6);
 
-   drawBox(22,27,3,17,'#03c04a',2);
+   //drawBox(22,27,3,17,'#03c04a',2);
 
-   let colors = ['purple','blue','red'];
-   for (var i = 0; i < 3; ++i) {
-      let myX = 22 + i;
-      labelTile(myX,37,colors[i]);
+  for (var j = 0; j < 3; ++j) {
+   for (var i = 0; i < 5; ++i) {
+
+      let color = (i == 0 || i == 4) ? 'red' : 'blue';
+      let myX = i+11;
+      let myY = j+9;
+      labelVertPathTile(myX,myY,color);
    }
 
+  }
 
 }
 

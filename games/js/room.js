@@ -240,22 +240,6 @@ Room.prototype.encloses = function(x,y) {
    return this.contains(x,'x') && this.contains(y,'y');
 }
 
-Room.prototype.below = function(room) {
-   return this.center.y > room.center.y;
-};
-
-Room.prototype.above = function(room) {
-   return this.center.y < room.center.y;
-};
-
-Room.prototype.onLeft = function(room) {
-   return this.center.x < room.center.x;
-}
-
-Room.prototype.onRight = function(room) {
-   return this.center.x > room.center.x;
-}
-
 Room.prototype.betweenHoriz = function(room1,room2) {
 
   return this.sharesCoordsWith(room1,'y') && 
@@ -331,75 +315,90 @@ Room.prototype.connectRoom = function(room, min=3) {
 
 Room.prototype.cornerVert = function(room, corner) {
 
-   console.log(`room${this.id} is using cornerVert to connect with room${room.id}`);
-
    let vert = new Path(), horiz = new Path();
 
-      /**
-       *  *--- room (onRight)
-       *  |
-       *  |
-       * this
+      /** If this is above
+       * 
+       *        this
+       *         |
+       *         |
+       * room ---*--- room 
        */
-      /**
-       *    this
-       *      |    
-       *      *---room
-       */ 
-      if (this.above(room)) {
+ 
+      if (this.end.y < room.center.y) {
+
+           // draw downwards from MC room's bottom
            vert.start = {x:this.center.x, y:this.end.y + 1};
-             // end at top center of other room
+
+           // end at the corner
            vert.end = corner;
       }
       /**  
+       * else if this is below
        * 
-       * Here we are drawing downwards from the other room's vertical center
-       * to this room's top edge and horizontal center.
-       *  room ---*
+       *  room ---*----room
        *          |
        *         this
        */
-      if (this.below(room))  {
+      else if (this.start.y > room.center.y)  {
+          // Drawing downwards from the other room's vertical center
           vert.start = corner;
 
+          // to this room's top edge and horizontal center.
           vert.end = {x:this.center.x, y:this.start.y - 1};
+      }
+      else {
+          console.log(`Target room${room.id} center x is between MC Room${this.id} start and end; corner connect failed`);
+          return false;
       }
        /**  
        * 
-       * If on left, start horizontal path from the room on left.
-       * End the horizontal path at this room's center.
-       *  this 
-       *    |    
-       *    * ---this
+       * If this is on left
+       * 
+       *      *--room
+       *      |
+       *    this
+       *      | 
+       *      *---room
+       * 
        */
 
-      if (this.onLeft(room)) {
+      if (this.center.x < room.start.x) {
 
+         // start horizontal path from corner 
          horiz.start = corner;
 
+         // end when you get to start of other room
          horiz.end = {x:room.start.x - 1, y:room.center.y};
  
       }
       /**  
        * 
-       * If on right, start horizontal path from the room on left.
-       * End the horizontal path at this room's center.
+       * If this is on right
+       * 
+       *        this
+       *          |
        *  room ---*
        *          |
        *         this
        */
-      if (this.onRight(room)) {
+      else if (this.center.x > room.end.x) {
 
+           // Start horizontal path from the room on left.
            horiz.start = {x:room.end.x + 1, y:room.center.y};
+
+           // End the horizontal path at this room's center.
            horiz.end = corner;
      
       }
-
-      
+      else {
+           console.log(`Target room${room.id} center x is between MC Room${this.id} start and end; corner connect failed`);
+      }
 
       let tileCode = DEBUG ? ITEM_CODE : FLOOR_CODE;
 
-      if (!vert.isAdjacentVert() && !horiz.isAdjacentHoriz()) {
+      if (!vert.isAdjacentVert() && 
+          !horiz.isAdjacentHoriz()) {
            game.addPath(vert,null, null, tileCode);
            game.addPath(horiz,null, null, tileCode);
 
@@ -483,7 +482,8 @@ Room.prototype.cornerHoriz = function(room, corner) {
          return false;
       }
 
-      if (!vert.isAdjacentVert(null, 'corner') && !horiz.isAdjacentHoriz(null, 'corner')) {
+      if (!vert.isAdjacentVert() && 
+          !horiz.isAdjacentHoriz()) {
 
            let tileCode = DEBUG ? SPELL_CODE : FLOOR_CODE;
 

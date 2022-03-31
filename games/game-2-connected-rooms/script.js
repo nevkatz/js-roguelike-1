@@ -2,7 +2,7 @@
  *  Game Constants
  * 
  */ 
-const DEBUG = true;
+const DEBUG = false;
 
 const OUTER_LIMIT = 3;
 
@@ -230,7 +230,7 @@ function startGame() {
        generateEnemies(TOTAL_ENEMIES);
       drawMap(0, 0, COLS, ROWS);
       updateStats();
-       labelRooms();
+      // labelRooms();
    }
 
 }
@@ -350,13 +350,9 @@ function addRoom(c) {
    }
 
    game.curRoomId++;
-
-
    game.carveRoom(room);
-
    game.rooms.push(room);
    return room;
-
 }
 
 /**
@@ -368,6 +364,12 @@ function addRoom(c) {
 function generateMapRooms() {
 
    game.resetMap();
+
+   let center = {
+      x: COLS / 2,
+      y: ROWS / 2
+   };
+   addRoom(center);
 
    let maxRooms = 30;
 
@@ -630,12 +632,12 @@ function generateEnemies(amount) {
 
 function generatePlayer() {
 
-   let coords = generateValidCoords();
+  // let coords = generateValidCoords();
 
-  /* var coords = {
+   let coords = {
       x: COLS / 2,
       y: ROWS / 2
-   };*/
+   };
 
    // level, health, weapon, coords, xp
    player = new Player(1, 100, WEAPONS[0], coords, 30);
