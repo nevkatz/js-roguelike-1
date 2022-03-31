@@ -78,89 +78,22 @@ Room.prototype.fillMap = function() {
       }
    }
 }
-// we need both a vertical or horizontal overlap.
-
+/**
+ *  Horiz overlap
+ */ 
 Room.prototype.overlapsHoriz = function(room, wall=0) {
-   return this.overlapsRight(room, wall) || this.overlapsLeft(room, wall);
+   return room.end.x + wall  >= this.start.x  &&
+           this.end.x + wall >= room.start.x;
 }
+/**
+ *  Vert overlap
+ */ 
 Room.prototype.overlapsVert = function(room, wall=0) {
-   return this.overlapsTop(room, wall) || this.overlapsBot(room, wall);
+   return room.end.y + wall >= this.start.y &&
+          this.end.y + wall >= room.start.y;
 }
-Room.prototype.overlapsLeft = function(room, wall=0) {
-
-   // the end is to the right of the other room's start
-   return this.end.x + wall >= room.start.x &&
-   // the start is to the left of hte other room's end
-          this.start.x - wall <= room.end.x;
-
- /**
-  * 
-  * Here the doorTiles of overlap is between other.start.x and this.end.x
-  * 
-  * this.start.x
-  *   |
-  *   *--------* <- this.end.x
-  *   |  this  |
-  *   *--------*
-  *        *--------* <- room.end.x
-  *        |  other |
-  *        *--------*
-  *        |
-  *   room.start.x
-  */
-}
-Room.prototype.overlapsRight = function(room, wall=0) {
-
-   return  this.start.x - wall <= room.end.x &&
-           this.end.x + wall >=  room.start.x;
-
- /**
-  * 
-  *          this.start.x
-  *             |
-  *             *--------* <- this.end.x
-  *             |  this  |
-  *             *--------*
-  *       *--------* <- room.end.x
-  *       |  other |
-  *       *--------*
-  *        |
-  *  room.start.x
-  */
-
-}
-Room.prototype.overlapsTop = function(room, wall=0) {
-
-   return this.end.y + wall >= room.start.y &&
-          this.start.y - wall <= room.end.y;
- /**
-  *    *--------* <-- this.start.y
-  *    |        | 
-  *    |  this  |
-  *    |        |    *---------* <- room.start.y
-  *    *--------*    |  other  |
-  *    |             |  room   |
-  *  this.end.y      *---------* <- room.end.y
-  */                 
-}
-Room.prototype.overlapsBot = function(room, wall=0) {
 
 
-   return this.start.y <= room.end.y + wall  &&
-          this.end.y >= room.start.y - wall;
-
- /**
-  *    *--------* <-- room.start.y
-  *    |        | 
-  *    |  other |
-  *    |  room  |    *---------* <- this.start.y
-  *    |        |    |         |
-  *    *--------*    |   this  |
-  *    |             |         |  
-  *  room.end.y      *---------* <- this.end.y
-  */                 
-
-}
 
 /**
  * Used to eliminate rooms.

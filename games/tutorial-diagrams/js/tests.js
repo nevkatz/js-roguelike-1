@@ -40,6 +40,67 @@ function twoHorizOverlap() {
    renderCanvas(20, 24);
 
 }
+function overlapHorizLabeled() {
+   resetMap();
+
+   let r1 = {
+      x:7,
+      y:5
+   };
+
+   let r2 = {
+      x:12,
+      y:14
+   };
+
+   let room1 = addRoom(r1);
+   let room2 = addRoom(r2);
+
+
+
+   renderCanvas(20, 20);
+
+   let fontSize = 15;
+   let y1 = 3.2, y2 = -1.2;
+   let xs = 0.5, xe = 8;
+   labelRoomFlex(room1,'start',{x:xs,y:y1}, fontSize);
+   labelRoomFlex(room1,'end',{x:xe,y:y1}, fontSize);
+
+   labelRoomFlex(room2,'start',{x:xs,y:y2}, fontSize);
+   labelRoomFlex(room2,'end',{x:xe,y:y2}, fontSize);
+
+}
+
+function overlapHorizLabeled2() {
+   resetMap();
+
+   let r1 = {
+      x:12,
+      y:5
+   };
+
+   let r2 = {
+      x:7,
+      y:14
+   };
+
+   let room1 = addRoom(r1);
+   let room2 = addRoom(r2);
+
+
+
+   renderCanvas(20, 20);
+
+   let fontSize = 15;
+   let y1 = 3.2, y2 = -1.2;
+   let xs = 0.5, xe = 8;
+   labelRoomFlex(room1,'start',{x:xs,y:y1}, fontSize);
+   labelRoomFlex(room1,'end',{x:xe,y:y1}, fontSize);
+
+   labelRoomFlex(room2,'start',{x:xs,y:y2}, fontSize);
+   labelRoomFlex(room2,'end',{x:xe,y:y2}, fontSize);
+
+}
 function twoVertOverlap() {
    resetMap();
 
@@ -57,6 +118,40 @@ function twoVertOverlap() {
    addRoom(r2);
 
    renderCanvas(32, 18);
+
+
+
+}
+function overlapVertLabeled() {
+   resetMap();
+
+   let r1 = {
+      x:6,
+      y:4
+   };
+
+   let r2 = {
+      x:18,
+      y:8
+   };
+
+   let room1 =  addRoom(r1);
+   let room2 = addRoom(r2);
+
+   renderCanvas(25, 13);
+
+    
+   let fontSize = 15;
+   let ye = 3.2, ys = -1.3;
+   let xs = 0.5, xe = 7.8;
+   // change
+   labelRoomFlex(room1,'start',{x:xe-0.3, y:ys}, fontSize);
+   labelRoomFlex(room1,'end',{x:xe, y:ye}, fontSize);
+
+   labelRoomFlex(room2,'start',{x:xs, y:ys}, fontSize);
+
+   // change
+   labelRoomFlex(room2,'end',{x:xs, y:ye}, fontSize);
 
 }
 /**

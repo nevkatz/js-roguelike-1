@@ -54,8 +54,7 @@ function init() {
    game.canvas = document.getElementById("grid");
    game.context = game.canvas.getContext("2d");
 
-   
-   showHorizDoorTiles();
+   overlapVertLabeled();
 
 
 }
@@ -90,6 +89,17 @@ function labelRoom(room, label, offset = 0, size=20) {
    let x = (room.start.x+1+offset)*TILE_DIM;
   
    let y = (room.center.y+1)*TILE_DIM;
+      
+   game.context.fillText(label, x, y);
+
+}
+function labelRoomFlex(room, label, offset, size=20) {
+   game.context.fillStyle ='black';
+   game.context.font = size + 'px Arial';
+
+   let x = (room.start.x+offset.x)*TILE_DIM;
+  
+   let y = (room.center.y+offset.y)*TILE_DIM;
       
    game.context.fillText(label, x, y);
 

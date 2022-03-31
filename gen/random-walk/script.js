@@ -256,7 +256,7 @@ async function generateMap() {
            
             drawObject(x, y, color, mapId)
 
-            await sleep(20);
+            await sleep(10);
 
             updateStats({
                attempts: i,
