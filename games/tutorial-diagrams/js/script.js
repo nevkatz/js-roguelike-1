@@ -22,8 +22,11 @@ const FLOOR_CODE = 1;
 
 const TILE_DIM = 10;
 
+/**
+ * Light grey: #bbb
+ */ 
 const TILE_COLORS = [
-   'grey',
+   '#aacced',
    'white',
 ];
 // game object
@@ -54,8 +57,7 @@ function init() {
    game.canvas = document.getElementById("grid");
    game.context = game.canvas.getContext("2d");
 
-   overlapVertLabeled();
-
+   showVertOverlap();
 
 }
 init();

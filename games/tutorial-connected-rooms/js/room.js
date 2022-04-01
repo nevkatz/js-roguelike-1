@@ -325,7 +325,7 @@ Room.prototype.cornerHoriz = function(room, corner) {
        *  this -----*
        */
       // on left
-      if (room.center.x > this.end.x) {
+      if (this.end.x < room.center.x) {
          horiz.start = {x:this.end.x + 1,y:this.center.y},
          horiz.end = corner
       }

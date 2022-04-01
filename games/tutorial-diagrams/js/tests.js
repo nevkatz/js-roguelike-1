@@ -336,33 +336,44 @@ function testNonOverlap() {
 function showVertOverlap() {
    resetMap();
 
+   let origX = 6
+   let origY = 4;
+
    let r1 = {
-      x:19,
-      y:30
+      x:origX,
+      y:origY
    };
 
    let r2 = {
-      x:27,
-      y:40
+      x:origX + 8,
+      y:origY + 9
    };
 
 
-   addRoom(r1);
-   addRoom(r2);
+   let room1 = addRoom(r1);
+   let room2 = addRoom(r2);
+   room1.findFacingRooms(3);
   // connectBasic(-1);
 
-   drawMap(0, 0, COLS, ROWS);
+   renderCanvas(21,18);
    
    //labelRooms();
+   //vertAnnotate(origX,origY);
+
+
+}
+function vertAnnotate(origX,origY) {
 
   // drawBox(22,24,3,13,'#03c04a',6);
-
-   drawBox(22,27,3,17,'#03c04a',2);
+   let boxLeft = origX + 3;
+   let boxTop = origY - 3;
+   let tileTop = origY + 3;
+   drawBox(boxLeft,boxTop,3,16,'#03c04a',2);
 
    for (var i = 0; i < 3; ++i) {
-      let myX = 22 + i;
-      labelTile(myX,37,'purple');
-      labelTile(myX,33,'purple');
+      let myX = origX +3 + i;
+      labelTile(myX, tileTop,'purple');
+      labelTile(myX, tileTop+3,'purple');
    }
 
 }

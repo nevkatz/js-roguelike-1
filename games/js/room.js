@@ -34,9 +34,8 @@ Room.prototype.overlapsHoriz = function(room, tolerance=0) {
  */ 
 Room.prototype.sharesCoordsWith = function(room, coord, min=1) {
 
-   return room.end[coord] - this.start[coord] >= min &&
-           this.end[coord] - room.start[coord] >= min;
-
+   return room.end[coord] - this.start[coord] + 1 >= min &&
+           this.end[coord] - room.start[coord] + 1 >= min;
 
 }
 

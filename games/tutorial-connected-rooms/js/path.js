@@ -60,7 +60,7 @@ Path.prototype.isAdjacentHoriz = function(testY) {
       for (var x = this.start.x; x <= this.end.x; ++x) {
 
          if (game.map[y + diff] &&
-            game.map[y + diff][x] != WALL_CODE) {
+             game.map[y + diff][x] != WALL_CODE) {
 
             consecutive++;
 

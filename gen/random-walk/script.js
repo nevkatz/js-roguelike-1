@@ -255,7 +255,6 @@ async function generateMap() {
             let color = TILE_COLORS[DIGGER_CODE]
            
             drawObject(x, y, color, mapId)
-
             await sleep(10);
 
             updateStats({
