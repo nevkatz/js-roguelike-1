@@ -389,34 +389,8 @@ Room.prototype.cornerHoriz = function(room, corner) {
       }
       return this.neighbors.includes(room);
 }
-/**
- * @param {Object} room
- * @param {string} axis - x or y
- * 
- */ 
-Room.prototype.alignedEdge = function(room,axis) {
-   return this.start[axis] == room.start[axis] ||
-          this.end[axis] == room.end[axis];
-     
-}
-/**
- * @param {Object} room
- * @param {string} axis - x or y
- * 
- */ 
-Room.prototype.alignedEdges = function(room,axis) {
-   return this.start[axis] == room.start[axis] &&
-          this.end[axis] == room.end[axis];
-     
-}
-/**
- * @param {Object} room
- * @param {string} axis - x or y
- * 
- */ 
-Room.prototype.alignedCenters = function(room,axis) {
-   return this.center[axis] == room.centers[axis];
-}
+
+
 Room.prototype.possibleExits = function(room,axis,wall) {
  
    let start = Math.max(this.start[axis] + wall, room.start[axis] + wall);

@@ -522,9 +522,9 @@ Room.prototype.alignedCenters = function(room,axis) {
 }
 Room.prototype.possibleExits = function(room,axis,wall) {
  
-   let start = Math.max(this.start[axis] + wall, room.start[axis] + wall);
+   let start = Math.max(this.start[axis], room.start[axis]) + wall;
 
-   let end = Math.min(this.end[axis] - wall, room.end[axis] - wall);
+   let end = Math.min(this.end[axis], room.end[axis]) - wall;
 
    return {start, end};
 
@@ -535,11 +535,9 @@ Room.prototype.placePathX = function(room,path,wall) {
 
    for (var x = start; x <= end; ++x) {
 
-         // add inRoom logic for corners? 
          if (!path.isAdjacentVert(x)) {
                path.allowed = true;
                path.start.x = path.end.x = x;
-               console.log('Room'+this.id+' -- path is good at '+x);
                break;
          }
          else {
@@ -575,12 +573,9 @@ Room.prototype.addVertPath = function(room, path, wall) {
 
    path.end.y = Math.max(this.start.y,room.start.y) - 1;
 
-   let tileCode = FLOOR_CODE;
-
    path = this.placePathX(room,path,wall);
  
    if (path.allowed) {
-         // console.log('Room '+this.id+' starty : ' + path.start.y + ' end y: ' + path.end.y);
 
           game.addPath(path, this.id, 'addVertPath',tileCode);
 

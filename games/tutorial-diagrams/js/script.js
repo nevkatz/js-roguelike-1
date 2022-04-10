@@ -24,9 +24,10 @@ const TILE_DIM = 10;
 
 /**
  * Light grey: #bbb
+ * Blue: #aacced
  */ 
 const TILE_COLORS = [
-   '#aacced',
+   '#bbb',
    'white',
 ];
 // game object
@@ -57,7 +58,7 @@ function init() {
    game.canvas = document.getElementById("grid");
    game.context = game.canvas.getContext("2d");
 
-   showVertOverlap();
+   showHorizDoorTiles();
 
 }
 init();
@@ -95,8 +96,8 @@ function labelRoom(room, label, offset = 0, size=20) {
    game.context.fillText(label, x, y);
 
 }
-function labelRoomFlex(room, label, offset, size=20) {
-   game.context.fillStyle ='black';
+function labelRoomFlex(room, label, offset, size=20,color='black') {
+   game.context.fillStyle =color;
    game.context.font = size + 'px Arial';
 
    let x = (room.start.x+offset.x)*TILE_DIM;

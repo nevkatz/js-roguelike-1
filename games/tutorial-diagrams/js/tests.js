@@ -303,27 +303,105 @@ function testOverlapRight() {
   // drawBox(22,17,3,27,'#03c04a',6);
 
 }
+function inBetweenHoriz() {
+   resetMap();
+
+   let horizRooms = inBetweenHorizHelper();
+
+   renderCanvas(37,9);
+
+
+   
+   //labelRoomFlex(horizRooms[1],'test room',{x:2.5,y:1},15);
+   labelBetweenRooms(horizRooms);
+
+
+}
+function labelBetweenRooms(rooms) {
+   let positions = [3.5,2.5,3.5];
+   let labels = ['room2','test room','room1'];
+
+   for (let i = 0; i < rooms.length; ++i) {
+
+      let x = positions[i];
+      let label = labels[i];
+     
+
+      labelRoomFlex(rooms[i],labels[i],{x,y:1},15);
+
+   }
+}
+function inBetweenHorizHelper() {
+   let w = 12, rooms = []
+   let origX = 6, origY = 4;
+   for (var i = 0; i < 3; ++i) {
+      let r = {
+         x:origX+(i*w),
+         y:origY
+      };
+      let room = addRoom(r);
+      rooms.push(room);
+   }
+   return rooms;
+
+}
+function inBetweenVert() {
+   resetMap();
+
+   let vertRooms = inBetweenVertHelper();
+
+   renderCanvas(13,25);
+   
+
+  // labelRoomFlex(vertRooms[1],'test room',{x:2.5,y:1},15);
+
+  labelBetweenRooms(vertRooms);
+
+
+}
+function inBetweenVertHelper() {
+   let h = 8, rooms = []
+   let origX = 6, origY = 4;
+   for (var i = 0; i < 3; ++i) {
+
+      let r = {
+         x:origX,
+         y:origY+(i*h)
+      };
+      console.log(`coords: ${r.x},${r.y}`);
+      let room = addRoom(r);
+      rooms.push(room);
+   }
+   return rooms;
+
+}
 function testNonOverlap() {
    resetMap();
 
+   let origX = 6, origY = 4;
    let r1 = {
-      x:18,
-      y:20
+      x:origX,
+      y:origY
    };
 
    let r2 = {
-      x:27,
-      y:28
+      x:origX+10,
+      y:origY+8
    };
 
 
-   addRoom(r1);
-   addRoom(r2);
-   connectBasic(0);
+  let room1 = addRoom(r1);
+  let room2 = addRoom(r2);
+  let fontSize = 15;
+   connectBasic(1);
 
-   drawMap(0, 0, COLS, ROWS);
+   renderCanvas(23,17);
    
-   labelRoomsX();
+   //labelRoomsX();
+
+
+   //labelRoomFlex(room1,'end.x = '+room1.end.x,{x:3.7,y:1}, fontSize);
+   //labelRoomFlex(room2,'start.x = '+room2.start.x,{x:0.5,y:1}, fontSize);
 
   // drawBox(22,24,3,13,'#03c04a',6);
 
@@ -352,23 +430,102 @@ function showVertOverlap() {
 
    let room1 = addRoom(r1);
    let room2 = addRoom(r2);
-   room1.findFacingRooms(3);
+   //room1.findFacingRooms(3);
   // connectBasic(-1);
 
    renderCanvas(21,18);
    
    //labelRooms();
-   //vertAnnotate(origX,origY);
+   vertAnnotateTiles(origX,origY);
+   let fontSize = 15;
 
+   labelRoomFlex(room1,'end.x = 11',{x:3.5,y:1}, fontSize);
+   labelRoomFlex(room2,'start.x = 9',{x:0.5,y:1}, fontSize);
 
 }
-function vertAnnotate(origX,origY) {
+function vertOverlapCompareStarts() {
+   resetMap();
+
+   let origX = 6
+   let origY = 4;
+
+   let r1 = {
+      x:origX,
+      y:origY
+   };
+
+   let r2 = {
+      x:origX + 8,
+      y:origY + 9
+   };
+
+
+   let room1 = addRoom(r1);
+   let room2 = addRoom(r2);
+   //room1.findFacingRooms(3);
+  // connectBasic(-1);
+
+   renderCanvas(21,18);
+   
+   //labelRooms();
+
+   let fontSize = 15;
+
+
+   let str1 = `start.y = ${room1.start.y}`;
+   let str2 = `start.y = ${room2.start.y}`;
+   let y = -1.4
+
+   labelRoomFlex(room1,str1,{x:3.5,y}, fontSize, 'grey');
+   labelRoomFlex(room2,str2,{x:0.5,y}, fontSize);
+}
+function vertOverlapCompareEnds() {
+   resetMap();
+
+   let origX = 6
+   let origY = 4;
+
+   let r1 = {
+      x:origX,
+      y:origY
+   };
+
+   let r2 = {
+      x:origX + 8,
+      y:origY + 9
+   };
+
+
+   let room1 = addRoom(r1);
+   let room2 = addRoom(r2);
+   //room1.findFacingRooms(3);
+  // connectBasic(-1);
+
+   renderCanvas(21,18);
+   
+   //labelRooms();
+
+   let fontSize = 15;
+   console.log(`ends: ${room1.end.y},${room2.end.y}`);
+
+   labelRoomFlex(room1,'end.y = 7',{x:3.5,y:3}, fontSize);
+   labelRoomFlex(room2,'end.y = 16',{x:0.5,y:3}, fontSize,'grey');
+}
+function vertAnnotateLabel() {
+
+}
+function vertAnnotateBox(origX,origY) {
 
   // drawBox(22,24,3,13,'#03c04a',6);
    let boxLeft = origX + 3;
    let boxTop = origY - 3;
-   let tileTop = origY + 3;
    drawBox(boxLeft,boxTop,3,16,'#03c04a',2);
+}
+function vertAnnotateTiles(origX,origY) {
+
+    // drawBox(22,24,3,13,'#03c04a',6);
+
+   let tileTop = origY + 3;
 
    for (var i = 0; i < 3; ++i) {
       let myX = origX +3 + i;
@@ -391,12 +548,12 @@ function showHorizDoorTiles() {
    };
 
 
-   addRoom(r1);
-   addRoom(r2);
+   let room1 = addRoom(r1);
+   let room2 = addRoom(r2);
 
   // connectBasic(-1);
 
-   renderCanvas(28,20);
+   renderCanvas(27,21);
    
    //labelRooms();
 
@@ -405,15 +562,24 @@ function showHorizDoorTiles() {
    //drawBox(22,27,3,17,'#03c04a',2);
 
   for (var j = 0; j < 3; ++j) {
-   for (var i = 0; i < 5; ++i) {
+    for (var i = 0; i < 5; ++i) {
 
       let color = (i == 0 || i == 4) ? 'red' : 'blue';
       let myX = i+11;
       let myY = j+9;
       labelVertPathTile(myX,myY,color);
-   }
-
+    }
   }
+  let fontSize = 15;
+
+   labelRoomFlex(room1,'Math.min()',{x:3.5,y:-1}, fontSize);
+   labelRoomFlex(room1,'finds the',{x:5,y:1}, fontSize);
+   labelRoomFlex(room1,'leftmost end',{x:2.5,y:3},  fontSize)
+
+     let x = 0.5;
+   labelRoomFlex(room2,'Math.max()',{x,y:-1}, fontSize);
+   labelRoomFlex(room2,'finds the',{x,y:1}, fontSize);
+   labelRoomFlex(room2,'rightmost start',{x,y:3},  fontSize);
 
 }
 

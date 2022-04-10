@@ -69,12 +69,12 @@ class Room {
       this.neighbors = [];
    }
 }
-Room.prototype.fillMap = function() {
+Game.prototype.carveRoom = function(room) {
 
-   for (var y = this.start.y; y <= this.end.y; ++y) {
-      for (var x = this.start.x; x <= this.end.x; ++x) {
+   for (var y = room.start.y; y <= room.end.y; ++y) {
+      for (var x = room.start.x; x <= room.end.x; ++x) {
 
-         game.map[y][x] = FLOOR_CODE;
+         this.map[y][x] = FLOOR_CODE;
       }
    }
 }
@@ -278,8 +278,7 @@ function addRoom() {
 
    game.curRoomId++;
 
-
-   room.fillMap();
+   game.carveRoom(room);
 
    game.rooms.push(room);
    return true;
