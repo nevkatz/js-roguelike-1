@@ -69,21 +69,21 @@ function labelRooms() {
    game.context.font = '15px Arial';
    game.rooms.forEach(function(room) {
 
-     // let txt = `r${room.id} (${room.start.x},${room.start.y})`;
+     let id = `r${room.id} (${room.start.x},${room.start.y})`;
 
-     let txt = `start: (${room.start.x},${room.start.y})`;
+     let start = `start: (${room.start.x},${room.start.y})`;
 
       let x = (room.start.x+1)*TILE_DIM;
   
       let y = room.center.y*TILE_DIM;
       
-      game.context.fillText(txt, x, y);
+      game.context.fillText(id, x, y);
 
       y+= 2*TILE_DIM;
 
-      let end= `end: (${room.end.x},${room.end.y})`;
+      let end = `end: (${room.end.x},${room.end.y})`;
 
-      game.context.fillText(end,x,y);
+      game.context.fillText(start,x,y);
    });
 }
 function labelRoom(room, label, offset = 0, size=20) {
@@ -227,8 +227,92 @@ function genCenterCoord (maxCells, dim) {
       // get a random  number within 
       return minDist + Math.round(Math.random() * range);
 }
+function addNearbyRoom(room, roomBefore) {
+ // let axis = Math.random() <= 0.5 ? 'x' : 'y';
 
-function addNearbyRoom(room) {
+  let { width, height } = genDim();
+
+  const distBetween = (axis) => {
+      let buff = 2;
+      let newSize = axis == 'y' ? height : width;
+      let roomSize = room.end[axis] - room.start[axis];
+      return Math.ceil((newSize+roomSize)/2) + buff; 
+  } 
+
+/*  const withinLimits = (coords) => {
+       let h = Math.ceil(height/2) + OUTER_LIMIT;
+       let w = Math.ceil(width/2) + OUTER_LIMIT;
+
+       if (coords.x - w >= 0 &&
+           coords.y - h >= 0 &&
+           coords.x + w < COLS && 
+           coords.y + h < ROWS) {
+         return true;
+
+       }
+       return false;
+  }*/
+  const withinLimits =(room)=> {
+   return room.start.x >= OUTER_LIMIT &&
+          room.start.y >= OUTER_LIMIT &&
+          room.end.x < COLS - OUTER_LIMIT &&
+          room.end.y < ROWS - OUTER_LIMIT;
+  }
+  const overlapsAny = (myRoom) => {
+     for (var gameRoom of game.rooms) {
+      if (myRoom.overlaps(gameRoom, 1)) {
+         return true;
+      }
+    }
+   return false;
+  }
+  
+
+  let possibleCenters = {
+    above:{
+      x:room.center.x,
+      y:room.center.y - distBetween('y')
+    },
+    below:{
+      x:room.center.x,
+      y:room.center.y + distBetween('y')
+    },
+    left:{
+      x:room.center.x - distBetween('x'),
+      y:room.center.y
+    },
+    right:{
+      x:room.center.x + distBetween('x'),
+      y:room.center.y
+    }
+  };
+  let possibleRooms = [];
+
+  for (key in possibleCenters) {
+
+     let center = possibleCenters[key];
+
+     let room = generateRoom(center, width, height);
+
+     if (withinLimits(room) && !overlapsAny(room)) {
+       possibleRooms.push(room);
+     }
+
+  }
+  let newRoom = null;
+  console.log('possible rooms: ' + possibleRooms.length);
+  if (possibleRooms.length > 0) {
+     let idx = Math.floor(Math.random()*possibleRooms.length);
+     newRoom = possibleRooms[idx];
+     game.curRoomId++;
+     console.log('placing room...');
+     console.log(newRoom);
+     game.carveRoom(newRoom);
+     game.rooms.push(newRoom);
+  }
+  return newRoom;
+}
+/*function addNearbyRoom(room) {
 
    const ABOVE = 0, LEFT = 1, BELOW = 2, RIGHT = 3;
 
@@ -239,6 +323,7 @@ function addNearbyRoom(room) {
    const numPositions = 4;
 
    const pos = Math.floor(numPositions*Math.random());
+
 
 
 
@@ -264,14 +349,14 @@ function addNearbyRoom(room) {
          return null;
       }
 
-   }*/
+   }
 
    game.curRoomId++;
    game.carveRoom(myRoom);
    game.rooms.push(myRoom);
    return myRoom;
 
-}
+}*/
 function addRoom(c) {
 
    let { width, height } = genDim();
@@ -284,12 +369,9 @@ function addRoom(c) {
    let room = generateRoom(coords, width, height);
 
    for (var gameRoom of game.rooms) {
-
       if (room.overlaps(gameRoom, 1)) {
-   
          return null;
       }
-
    }
 
    game.curRoomId++;
