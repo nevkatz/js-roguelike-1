@@ -27,7 +27,7 @@ const TILE_DIM = 10;
  * Blue: #aacced
  */ 
 const TILE_COLORS = [
-   '#bbb',
+   'grey',
    'white',
 ];
 // game object
@@ -58,7 +58,8 @@ function init() {
    game.canvas = document.getElementById("grid");
    game.context = game.canvas.getContext("2d");
 
-   showHorizDoorTiles();
+   //showHorizDoorTiles();
+   test1();
 
 }
 init();
@@ -226,6 +227,51 @@ function genCenterCoord (maxCells, dim) {
       // get a random  number within 
       return minDist + Math.round(Math.random() * range);
 }
+
+function addNearbyRoom(room) {
+
+   const ABOVE = 0, LEFT = 1, BELOW = 2, RIGHT = 3;
+
+   let { width, height } = genDim();
+
+   let center = JSON.parse(JSON.stringify(room.center));
+
+   const numPositions = 4;
+
+   const pos = Math.floor(numPositions*Math.random());
+
+
+
+   const axis = (pos%2 == 0) ? 'y' : 'x';
+
+   const prop = (axis == 'y') ? height : width;
+
+   const multiplier = (pos > 1) ? 1 : -1;
+
+   let diff = room.end[axis] - room.center[axis];
+
+   let ttl = Math.ceil(prop/2) + diff + 2; 
+
+   center[axis] = room.center[axis] + multiplier*ttl;
+   
+   console.log('pos: '+pos+' axis: ' + axis + ' center val: ' + center[axis]);
+   let myRoom = generateRoom(center, width, height);
+
+  /* for (var gameRoom of game.rooms) {
+
+      if (room.overlaps(gameRoom, 1)) {
+   
+         return null;
+      }
+
+   }*/
+
+   game.curRoomId++;
+   game.carveRoom(myRoom);
+   game.rooms.push(myRoom);
+   return myRoom;
+
+}
 function addRoom(c) {
 
    let { width, height } = genDim();
@@ -240,17 +286,14 @@ function addRoom(c) {
    for (var gameRoom of game.rooms) {
 
       if (room.overlaps(gameRoom, 1)) {
-         console.log('room overlaps');
+   
          return null;
       }
 
    }
 
    game.curRoomId++;
-
-
    game.carveRoom(room);
-
    game.rooms.push(room);
    return room;
 

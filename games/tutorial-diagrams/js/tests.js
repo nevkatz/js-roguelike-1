@@ -853,12 +853,8 @@ function betweenVertBlank() {
 function renderCanvas(w,h) {
 
    let c = document.querySelector('canvas');
-   
    c.width = w*TILE_DIM;
    c.height = h*TILE_DIM;
-
    drawMap(0,0,w,h);
-
-
 }
 
