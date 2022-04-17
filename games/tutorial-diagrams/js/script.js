@@ -144,12 +144,33 @@ function resetMap() {
       }
    }
 }
+function genDim() {
+   const BASE_DIM = 6;
+   const EXTRA = 3;
 
+   let width, height;
+
+   width = height = BASE_DIM;
+
+   let additional = Math.round(Math.random() * EXTRA);
+
+   let type = (Math.random() < 0.5) ? 'tall' : 'wide';
+
+   if (type == 'tall') {
+      height += additional;
+   } else {
+      width += additional;
+   }
+   return {
+      width,
+      height
+   };
+};
 /**
  * Randomly generates a set of dimensions.
  * 
  */
-function genDim() {
+function genConstantDim() {
    const BASE_DIM = 6;
    const EXTRA = 3;
 
@@ -266,7 +287,6 @@ function addNearbyRoom(room, roomBefore) {
     }
    return false;
   }
-  
 
   let possibleCenters = {
     above:{
