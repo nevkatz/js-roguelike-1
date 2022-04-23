@@ -577,7 +577,7 @@ Room.prototype.addVertPath = function(room, path, wall) {
  
    if (path.allowed) {
 
-          game.addPath(path, this.id, 'addVertPath',tileCode);
+          game.addPath(path);
 
           this.addNeighbor(room);
    }

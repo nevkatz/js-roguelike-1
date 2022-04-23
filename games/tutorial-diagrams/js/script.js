@@ -9,7 +9,7 @@ const DEBUG = false;
 const COLS = 80;
 const ROWS = 60;
 
-const OUTER_LIMIT = 3;
+const OUTER_LIMIT = 2;
 
 const SHADOW_CODE = 0;
 const VISIBLE_CODE = 1;
@@ -69,7 +69,7 @@ function labelRooms() {
    game.context.font = '15px Arial';
    game.rooms.forEach(function(room) {
 
-     let id = `r${room.id} (${room.start.x},${room.start.y})`;
+     let id = `r${room.id}`;
 
      let start = `start: (${room.start.x},${room.start.y})`;
 
@@ -259,25 +259,11 @@ function addNearbyRoom(room, roomBefore) {
       let roomSize = room.end[axis] - room.start[axis];
       return Math.ceil((newSize+roomSize)/2) + buff; 
   } 
-
-/*  const withinLimits = (coords) => {
-       let h = Math.ceil(height/2) + OUTER_LIMIT;
-       let w = Math.ceil(width/2) + OUTER_LIMIT;
-
-       if (coords.x - w >= 0 &&
-           coords.y - h >= 0 &&
-           coords.x + w < COLS && 
-           coords.y + h < ROWS) {
-         return true;
-
-       }
-       return false;
-  }*/
   const withinLimits =(room)=> {
    return room.start.x >= OUTER_LIMIT &&
           room.start.y >= OUTER_LIMIT &&
-          room.end.x < COLS - OUTER_LIMIT &&
-          room.end.y < ROWS - OUTER_LIMIT;
+          room.end.x <= COLS - OUTER_LIMIT &&
+          room.end.y <= ROWS - OUTER_LIMIT;
   }
   const overlapsAny = (myRoom) => {
      for (var gameRoom of game.rooms) {
@@ -286,38 +272,43 @@ function addNearbyRoom(room, roomBefore) {
       }
     }
    return false;
-  }
+  };
 
-  let possibleCenters = {
-    above:{
-      x:room.center.x,
+  let possibleCenters = (diff=0) => {
+   return [
+   // above
+    {
+      x:room.center.x + diff,
       y:room.center.y - distBetween('y')
     },
-    below:{
-      x:room.center.x,
+    // below
+    {
+      x:room.center.x + diff,
       y:room.center.y + distBetween('y')
     },
-    left:{
+    //left
+    {
       x:room.center.x - distBetween('x'),
-      y:room.center.y
+      y:room.center.y + diff
     },
-    right:{
+    // right
+    {
       x:room.center.x + distBetween('x'),
-      y:room.center.y
+      y:room.center.y + diff
     }
-  };
+  ];
+  } 
   let possibleRooms = [];
 
-  for (key in possibleCenters) {
+  let range = 3;
+  for (var i = -1*range; i <= range; ++i) {
+   for (center of possibleCenters(range)) {
+     let r = generateRoom(center, width, height);
 
-     let center = possibleCenters[key];
-
-     let room = generateRoom(center, width, height);
-
-     if (withinLimits(room) && !overlapsAny(room)) {
-       possibleRooms.push(room);
+     if (withinLimits(r) && !overlapsAny(r)) {
+       possibleRooms.push(r);
      }
-
+   }
   }
   let newRoom = null;
   console.log('possible rooms: ' + possibleRooms.length);
