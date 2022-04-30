@@ -780,7 +780,7 @@ function enemyDefeated(enemy) {
    let e_idx = game.enemies.indexOf(enemy);
 
    // remove enemy from array
-   game.enemies.slice(e_idx, 1);
+   game.enemies.splice(e_idx, 1);
 
 
    // update stats
