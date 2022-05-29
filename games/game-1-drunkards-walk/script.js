@@ -225,7 +225,7 @@ function startGame() {
 
    generateMap();
 
-   setTimeout(gameSetUp, 1000);
+   setTimeout(gameSetUp, 1);
 
    function gameSetUp() {
       generatePlayer();
@@ -245,13 +245,19 @@ function startGame() {
  */
 function generateMap() {
    // generate a solid wall.
+
+   game.map = [];
+   game.shadow = [];
    for (var row = 0; row < ROWS; row++) {
       // create row
       game.map.push([]);
+      game.shadow.push([]);
+
 
       for (var col = 0; col < COLS; col++) {
          // create wall
          game.map[row].push(WALL_CODE);
+         game.shadow[row].push(SHADOW_CODE);
       }
    }
    // set up total number of tiles used
@@ -657,6 +663,7 @@ function generateShadow() {
    end.y = bot_edge >= ROWS ? ROWS - 1 : bot_edge;
 
    // iterate through all squares on the map
+   game.shadow = [];
    for (var row = 0; row < ROWS; row++) {
       game.shadow.push([]);
       for (var col = 0; col < COLS; col++) {
